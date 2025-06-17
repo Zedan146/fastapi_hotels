@@ -34,6 +34,9 @@ async def get_hotels(
             .limit(per_page)
             .offset(per_page * (pagination.page - 1))
         )
+        # Вывод сырого SQL-запроса в консоль
+        print(query.compile(compile_kwargs={"literal_binds": True}))
+
         result = await session.execute(query)
         hotels = result.scalars().all()
         return hotels
