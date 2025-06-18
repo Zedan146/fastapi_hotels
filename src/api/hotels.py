@@ -2,6 +2,7 @@ from fastapi import Query, APIRouter, Body
 
 from sqlalchemy import insert, select
 
+from repositories.hotels import HotelsRepository
 from src.api.dependencies import PaginationDep
 from src.database import async_session_maker
 from src.models.hotels import HotelsModel
@@ -18,28 +19,12 @@ async def get_hotels(
 ):
     per_page = pagination.per_page or 5
     async with async_session_maker() as session:
-        query = select(HotelsModel)
-        if title:
-            query = (
-                query
-                .filter(HotelsModel.title.ilike(f"%{title}%"))
-            )
-        if location:
-            query = (
-                query
-                .filter(HotelsModel.location.ilike(f"%{location}%"))
-            )
-        query = (
-            query
-            .limit(per_page)
-            .offset(per_page * (pagination.page - 1))
+        return await HotelsRepository(session).get_all(
+            title=title,
+            location=location,
+            limit=per_page,
+            offset=per_page * (pagination.page - 1)
         )
-        # Вывод сырого SQL-запроса в консоль
-        print(query.compile(compile_kwargs={"literal_binds": True}))
-
-        result = await session.execute(query)
-        hotels = result.scalars().all()
-        return hotels
 
 
 @router.post("", summary="Добавление отеля")
