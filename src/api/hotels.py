@@ -57,15 +57,12 @@ async def put_hotel(hotel_id: int, hotel_data: Hotel):
 
 
 @router.patch("/{hotel_id}", summary="Частичное изменение отеля")
-def patch_hotel(hotel_id: int, hotel_data: HotelPATCH):
-    for hotel in hotels:
-        if hotel["id"] == hotel_id:
-            if hotel_data.title:
-                hotel["title"] = hotel_data.title
-            if hotel_data.name:
-                hotel["name"] = hotel_data.name
+async def patch_hotel(hotel_id: int, hotel_data: HotelPATCH):
+    async with async_session_maker() as session:
+        patch_hotel = await HotelsRepository(session).edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await session.commit()   
 
-    return {"status": "OK"}
+    return {"status": "OK", "data": patch_hotel}
 
 
 @router.delete("/{hotel_id}", summary="Удаление отеля")
