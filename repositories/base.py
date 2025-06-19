@@ -25,21 +25,21 @@ class BaseRepository:
         return result.scalars().one()
     
     async def edit(self, data: BaseModel, **filter_by) -> None:
-          edit_data = (
+          edit_stmt = (
                 update(self.model)
-                .where(*[getattr(self.model, key) == value for key, value in filter_by.items()])
+                .filter_by(**filter_by)
                 .values(**data.model_dump())
                 .returning(self.model)
            )
-          result = await self.session.execute(edit_data)
+          result = await self.session.execute(edit_stmt)
           return result.scalars().all()
 
 
     async def delete(self, **filter_by) -> None:
-          delete_data =  (
+          delete_stmt =  (
                 delete(self.model)
-                .where(*[getattr(self.model, key) == value for key, value in filter_by.items()])
+                .filter_by(**filter_by)
                 .returning(self.model)
           )
-          result = await self.session.execute(delete_data)
+          result = await self.session.execute(delete_stmt)
           return result.scalars().all()
