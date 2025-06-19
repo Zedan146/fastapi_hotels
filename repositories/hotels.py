@@ -5,7 +5,7 @@ from src.models.hotels import HotelsModel
 
 
 class HotelsRepository(BaseRepository):
-    models = HotelsModel
+    model = HotelsModel
 
     async def get_all(
             self,
