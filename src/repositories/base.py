@@ -24,8 +24,8 @@ class BaseRepository:
                   return None
             return self.schema.model_validate(model, from_attributes=True)
 
-    async def add(self, data: BaseModel):
-        add_data_stmt = insert(self.model).values(**data.model_dump()).returning(self.model)
+    async def add(self, data: BaseModel, **kwargs):
+        add_data_stmt = insert(self.model).values({**data.model_dump(), **kwargs}).returning(self.model)
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().one()
         return self.schema.model_validate(model, from_attributes=True)
