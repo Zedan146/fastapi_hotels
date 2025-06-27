@@ -9,12 +9,15 @@ class UserAdd(BaseModel):
     hashed_password: str
 
 
-class UserRequestAdd(BaseModel):
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserRequestAdd(UserLogin):
     first_name: str
     last_name: str
     username: str
-    email: EmailStr
-    password: str
 
 
 class User(BaseModel):
@@ -23,3 +26,7 @@ class User(BaseModel):
     last_name: str
     username: str
     email: EmailStr
+
+
+class UserWithHashedPassword(User):
+    hashed_password: str
