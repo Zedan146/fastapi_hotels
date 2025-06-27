@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Request
 
 from services.auth import AuthService
 from src.repositories.users import UserRepository
@@ -35,4 +35,10 @@ async def login_user(data: UserLogin, response: Response):
         access_token = AuthService().create_access_token({"user_id": user.id})
         response.set_cookie("access_token", access_token)
         return {"access_token": access_token}
+    
+
+@router.get("/only_auth")
+async def only_auth(request: Request):
+    access_token = request.cookies.get("access_token", None)
+    return access_token 
         
