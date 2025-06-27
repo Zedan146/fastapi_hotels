@@ -44,7 +44,7 @@ async def get_me(user_id: UserIdDep):
         user = await UserRepository(session).get_one_or_none(id=user_id)
         return user
         
-@router.get("/logout", summary="Выход из системы")
+@router.post("/logout", summary="Выход из системы")
 async def logout_user(responce: Response):
     responce.delete_cookie("access_token")
     return {"status": "logout sucсess"}
