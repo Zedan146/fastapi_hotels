@@ -1,4 +1,7 @@
+from fastapi import HTTPException
+
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
 
 
@@ -47,5 +50,11 @@ class BaseRepository:
             .filter_by(**filter_by)
             .returning(self.model)
         )
-        result = await self.session.execute(delete_stmt)
+        try:
+
+            result = await self.session.execute(delete_stmt)
+
+        except IntegrityError:
+            raise HTTPException(400, detail="Нельзя удалить: есть связанные ссылки. Сначала удалите их.")
+
         return result.scalars().all()

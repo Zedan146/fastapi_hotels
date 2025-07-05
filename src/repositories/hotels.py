@@ -1,7 +1,7 @@
 from sqlalchemy import select
 
 from src.repositories.base import BaseRepository
-from schemas.hotels import Hotel
+from src.schemas.hotels import Hotel
 from src.models.hotels import HotelsModel
 
 

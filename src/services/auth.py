@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import HTTPException
 from passlib.context import CryptContext
 import jwt
+from jwt import ExpiredSignatureError
 
 from src.config import settings
 
@@ -25,6 +26,16 @@ class AuthService:
     
     def decode_token(self, token: str) -> dict:
         try:
+
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+
         except jwt.exceptions.DecodeError:
-            raise HTTPException(status_code=401, detail="Ошибка токена доступа")
+            raise HTTPException(
+                status_code=401,
+                detail="Ошибка токена доступа"
+            )
+        except ExpiredSignatureError:
+            raise HTTPException(
+                status_code=401,
+                detail="Время вашего токена истекло. Пожалуйста, войдите снова.",
+            )
