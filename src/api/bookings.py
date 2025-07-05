@@ -17,4 +17,14 @@ async def create_booking(
     await db.bookings.add(_booking_data)
     await db.session_commit()
 
-    return {"status": "OK"}
+    return {"status": "OK", "data": _booking_data}
+
+
+@router.get("", summary="Получение всех бронирований")
+async def get_bookings(db: DBDep):
+    return await db.bookings.get_all()
+
+
+@router.get("/me", summary="Получение бронирований пользователя")
+async def get_user_booking(user_id: UserIdDep, db: DBDep):
+    return await db.bookings.get_filtered(user_id=user_id)
