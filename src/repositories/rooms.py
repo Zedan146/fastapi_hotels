@@ -2,7 +2,6 @@ from datetime import date
 
 from sqlalchemy import select, func
 
-from src.database import engine
 from src.models.bookings import BookingsModel
 from src.repositories.base import BaseRepository
 from src.models.rooms import RoomsModel
@@ -51,8 +50,20 @@ class RoomsRepository(BaseRepository):
             .cte(name="rooms_left_table")
         )
 
-        query = (
-            select(rooms_left_table)
-            .select_from(rooms_left_table)
-            .filter(rooms_left_table.c.rooms_left > 0)
+        get_rooms_ids_for_hotel = (
+            select(RoomsModel.id)
+            .select_from(RoomsModel)
+            .filter_by(hotel_id=hotel_id)
+            .subquery(name="get_rooms_ids_for_hotel")
         )
+
+        rooms_ids_to_get = (
+            select(rooms_left_table.c.room_id)
+            .select_from(rooms_left_table)
+            .filter(
+                rooms_left_table.c.rooms_left > 0,
+                rooms_left_table.c.room_id.in_(get_rooms_ids_for_hotel)
+            )
+        )
+
+        return await self.get_filtered(RoomsModel.id.in_(rooms_ids_to_get))
