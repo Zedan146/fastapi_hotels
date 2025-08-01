@@ -29,7 +29,8 @@ async def create_room(hotel_id: int, db: DBDep, room_data: RoomAddRequest = Body
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
     room = await db.rooms.add(_room_data)
 
-    room_facilities_data = [RoomFacilityAdd(room_id=room.id, facility_id=facility) for facility in room_data.facilities_ids]
+    room_facilities_data = [RoomFacilityAdd(room_id=room.id, facility_id=facility) for facility in
+                            room_data.facilities_ids]
     await db.room_facilities.add_bulk(room_facilities_data)
     await db.session_commit()
 
@@ -39,7 +40,9 @@ async def create_room(hotel_id: int, db: DBDep, room_data: RoomAddRequest = Body
 @router.put("/{hotel_id}/rooms/{room_id}", summary="Изменение номера")
 async def put_room(room_data: RoomAddRequest, hotel_id: int, room_id: int, db: DBDep):
     _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
-    await db.rooms.edit(room_data, id=room_id)
+    await db.rooms.edit(_room_data, id=room_id)
+
+    await db.room_facilities.edit_room_with_facilities(room_data, room_id)
     await db.session_commit()
 
     return {"status": "OK"}
@@ -49,6 +52,8 @@ async def put_room(room_data: RoomAddRequest, hotel_id: int, room_id: int, db: D
 async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatchRequest):
     _room_data = RoomPatch(hotel_id=hotel_id, **room_data.model_dump(exclude_unset=True))
     await db.rooms.edit(_room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
+
+    await db.room_facilities.edit_room_with_facilities(room_data, room_id)
     await db.session_commit()
 
     return {"status": "OK"}
@@ -59,4 +64,4 @@ async def delete_room(hotel_id: int, room_id: int, db: DBDep):
     room = await db.rooms.delete(hotel_id=hotel_id, id=room_id)
     await db.session_commit()
 
-    return {"status": "OK", "data":  room}
+    return {"status": "OK", "data": room}
