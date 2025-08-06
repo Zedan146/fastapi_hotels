@@ -4,10 +4,13 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError
 from pydantic import BaseModel
 
+from src.repositories.mappers.base import DataMapper
+
 
 class BaseRepository:
     model = None
     schema: BaseModel = None
+    mapper: DataMapper = None
 
     def __init__(self, session):
         self.session = session
@@ -20,9 +23,9 @@ class BaseRepository:
         )
         # print(query.compile(compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
-    async def get_all(self, *args, **kwargs):
+    async def get_all(self):
         return await self.get_filtered()
 
     async def get_one_or_none(self, **filter_by):
@@ -33,15 +36,15 @@ class BaseRepository:
         model = result.scalars().one_or_none()
         if model is None:
             return None
-        return self.schema.model_validate(model)
+        return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, **kwargs):
         add_data_stmt = insert(self.model).values({**data.model_dump(), **kwargs}).returning(self.model)
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().one()
-        return self.schema.model_validate(model)
+        return self.mapper.map_to_domain_entity(model)
 
-    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> None:
+    async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by) -> BaseModel:
         edit_stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -49,7 +52,8 @@ class BaseRepository:
             .returning(self.model)
         )
         result = await self.session.execute(edit_stmt)
-        return result.scalars().all()
+        model = result.scalars().all()
+        return self.mapper.map_to_domain_entity(model)
 
     async def edit_bulk(self, data: list[BaseModel], exclude_unset: bool = False, **filter_by) -> None:
         edit_stmt = (
@@ -57,10 +61,9 @@ class BaseRepository:
             .filter_by(**filter_by)
             .values([item.model_dump(exclude_unset=exclude_unset) for item in data])
         )
-        result = await self.session.execute(edit_stmt)
-        return result.scalars().all()
+        await self.session.execute(edit_stmt)
 
-    async def delete(self, **filter_by) -> None:
+    async def delete(self, **filter_by) -> BaseModel:
         delete_stmt = (
             delete(self.model)
             .filter_by(**filter_by)
@@ -73,4 +76,5 @@ class BaseRepository:
         except IntegrityError:
             raise HTTPException(400, detail="Нельзя удалить: есть связанные ссылки. Сначала удалите их.")
 
-        return result.scalars().all()
+        model = result.scalars().all()
+        return self.mapper.map_to_domain_entity(model)

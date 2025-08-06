@@ -1,9 +1,10 @@
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from src.models.rooms import RoomsModel
 from src.repositories.base import BaseRepository
+from src.repositories.mappers.mappers import HotelDataMapper
 from src.repositories.utils import rooms_ids_for_booking
 from src.schemas.hotels import Hotel
 from src.models.hotels import HotelsModel
@@ -11,7 +12,7 @@ from src.models.hotels import HotelsModel
 
 class HotelsRepository(BaseRepository):
     model = HotelsModel
-    schema = Hotel
+    mapper = HotelDataMapper
 
     # async def get_all(
     #         self,
@@ -54,26 +55,33 @@ class HotelsRepository(BaseRepository):
     ) -> list[Hotel]:
         rooms_ids_to_get = rooms_ids_for_booking(date_from=date_from, date_to=date_to)
 
-        hotel_ids = (
+        hotels_ids_to_get = (
             select(RoomsModel.hotel_id)
             .select_from(RoomsModel)
             .filter(RoomsModel.id.in_(rooms_ids_to_get))
         )
 
+        query = (
+            select(HotelsModel)
+            .filter(HotelsModel.id.in_(hotels_ids_to_get))
+        )
+
         if title:
-            hotel_ids = (
-                hotel_ids
-                .filter(HotelsModel.title.ilike(f"%{title}%"))
+            query = (
+                query
+                .filter(func.lower(HotelsModel.title).contains(title.strip().lower()))
             )
         if location:
-            hotel_ids = (
-                hotel_ids
-                .filter(HotelsModel.location.ilike(f"%{location}%"))
+            query = (
+                query
+                .filter(func.lower(HotelsModel.location).contains(location.strip().lower()))
             )
-        hotel_ids = (
-            hotel_ids
+        query = (
+            query
             .limit(limit)
             .offset(offset)
         )
 
-        return await self.get_filtered(HotelsModel.id.in_(hotel_ids))
+        result = await self.session.execute(query)
+
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
