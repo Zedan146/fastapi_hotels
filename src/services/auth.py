@@ -11,7 +11,8 @@ from src.config import settings
 class AuthService:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    def create_access_token(self, data: dict) -> str:
+    @staticmethod
+    def create_access_token(data: dict) -> str:
         to_encode = data.copy()
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode.update({"exp": expire})
@@ -23,8 +24,9 @@ class AuthService:
     
     def hash_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
-    
-    def decode_token(self, token: str) -> dict:
+
+    @staticmethod
+    def decode_token(token: str) -> dict:
         try:
 
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
