@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Body
 
 from src.api.dependencies import DBDep, UserIdDep
@@ -28,8 +30,8 @@ async def create_booking(
             "summary": "Бронирование 1",
             "value": {
                 "room_id": 1,
-                "date_from": "2025-12-01",
-                "date_to": "2025-12-06"
+                "date_from": date.today(),
+                "date_to": date.today()
             }
         },
         "2": {
