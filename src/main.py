@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
@@ -8,8 +10,6 @@ from fastapi_cache.backends.redis import RedisBackend
 
 import sys
 from pathlib import Path
-from contextlib import asynccontextmanager
-
 
 
 sys.path.append(str(Path(__file__).parent.parent))
@@ -20,12 +20,13 @@ from src.api.hotels import router as router_hotels
 from src.api.rooms import router as router_rooms
 from src.api.bookings import router as router_bookings
 from src.api.facilities import router as router_facilities
+from src.api.images import router as router_images
 
 from src.init import redis_manager
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     await redis_manager.connector()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
     yield
@@ -38,9 +39,10 @@ app.include_router(router_hotels)
 app.include_router(router_rooms)
 app.include_router(router_bookings)
 app.include_router(router_facilities)
+app.include_router(router_images)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", tags=["Шаблоны"], summary="Домашняя страница", response_class=HTMLResponse)
 def home():
     return """
     <a href="http://127.0.0.1:8000/docs">Docs</a><br>
