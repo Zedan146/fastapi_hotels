@@ -12,6 +12,18 @@ from src.schemas.rooms import RoomAdd
 from src.utils.db_manager import DBManager
 
 
+@pytest.fixture(scope="function")
+async def db() -> DBManager:
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        yield db
+
+
+@pytest.fixture(scope="session")
+async def ac() -> AsyncClient:
+    async with AsyncClient(app=app, base_url="http://test") as ac:
+        yield ac
+
+
 @pytest.fixture(scope="session", autouse=True)
 def check_test_mode():
     assert settings.MODE == "TEST"
@@ -34,22 +46,21 @@ async def add_data_in_database(setup_database):
     hotels = [HotelAdd.model_validate(hotel) for hotel in hotels_data]
     rooms = [RoomAdd.model_validate(room) for room in rooms_data]
 
-    async with DBManager(session_factory=async_session_maker_null_pool) as db:
-        await db.hotels.add_bulk(hotels)
-        await db.rooms.add_bulk(rooms)
-        await db.session_commit()
+    async with DBManager(session_factory=async_session_maker_null_pool) as db_:
+        await db_.hotels.add_bulk(hotels)
+        await db_.rooms.add_bulk(rooms)
+        await db_.session_commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def register_user(add_data_in_database):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        await ac.post(
-            "/auth/register",
-            json={
-                "email": "test@example.com",
-                "password": "1234",
-                "first_name": "Name",
-                "last_name": "Name",
-                "username": "username"
-            }
-        )
+async def register_user(add_data_in_database, ac):
+    await ac.post(
+        "/auth/register",
+        json={
+            "email": "test@example.com",
+            "password": "1234",
+            "first_name": "Name",
+            "last_name": "Name",
+            "username": "username"
+        }
+    )
