@@ -2,12 +2,14 @@ import json
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import insert
 
 from src.config import settings
-from src.database import engine_null_pool, Base
+from src.database import engine_null_pool, Base, async_session_maker_null_pool
 from src.main import app
 from src.models import *
+from src.schemas.hotels import HotelAdd
+from src.schemas.rooms import RoomAdd
+from src.utils.db_manager import DBManager
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -26,13 +28,16 @@ async def setup_database(check_test_mode):
 async def add_data_in_database(setup_database):
     with open("tests/mock_hotels.json", "r") as file_hotels:
         hotels_data = json.load(file_hotels)
-        async with engine_null_pool.begin() as conn:
-            await conn.execute(insert(HotelsModel), hotels_data)
-
     with open("tests/mock_rooms.json", "r") as file_rooms:
         rooms_data = json.load(file_rooms)
-        async with engine_null_pool.begin() as conn:
-            await conn.execute(insert(RoomsModel), rooms_data)
+
+    hotels = [HotelAdd.model_validate(hotel) for hotel in hotels_data]
+    rooms = [RoomAdd.model_validate(room) for room in rooms_data]
+
+    async with DBManager(session_factory=async_session_maker_null_pool) as db:
+        await db.hotels.add_bulk(hotels)
+        await db.rooms.add_bulk(rooms)
+        await db.session_commit()
 
 
 @pytest.fixture(scope="session", autouse=True)
