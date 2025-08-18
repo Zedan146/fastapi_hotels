@@ -56,7 +56,8 @@ class BaseRepository:
             .returning(self.model)
         )
         result = await self.session.execute(edit_stmt)
-        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
+        model = result.scalars().one_or_none()
+        return self.mapper.map_to_domain_entity(model)
 
     async def edit_bulk(self, data: list[BaseModel], exclude_unset: bool = False, **filter_by) -> None:
         edit_stmt = (
