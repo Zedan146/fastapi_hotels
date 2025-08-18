@@ -1,4 +1,7 @@
 import json
+from unittest import mock
+
+mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
 from httpx import AsyncClient
@@ -72,3 +75,5 @@ async def register_user(add_data_in_database, ac):
             "username": "username"
         }
     )
+
+
