@@ -1,7 +1,7 @@
 from datetime import date
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
 
 from src.repositories.base import BaseRepository
 from src.models.rooms import RoomsModel
