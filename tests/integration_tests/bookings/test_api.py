@@ -1,7 +1,5 @@
 import pytest
-from sqlalchemy import delete
 
-from src.models import BookingsModel
 from tests.conftest import get_db_null_pool
 
 

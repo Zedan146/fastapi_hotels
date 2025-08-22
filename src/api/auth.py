@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, status
 
 from src.api.dependencies import UserIdDep, DBDep
 from src.services.auth import AuthService
@@ -10,17 +10,20 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 @router.post("/register", summary="Регистрация клиента")
 async def register_user(data: UserRequestAdd, db: DBDep):
     hashed_password = AuthService().hash_password(data.password)
-    new_user_data = UserAdd(
-        first_name=data.first_name,
-        last_name=data.last_name,
-        username=data.username,
-        email=data.email,
-        hashed_password=hashed_password
-    )
-    await db.users.add(new_user_data)
-    await db.session_commit()
+    if not await db.users.get_filtered(email=data.email):
+        new_user_data = UserAdd(
+            first_name=data.first_name,
+            last_name=data.last_name,
+            username=data.username,
+            email=data.email,
+            hashed_password=hashed_password
+        )
+        await db.users.add(new_user_data)
+        await db.session_commit()
 
-    return {"status": "OK"}
+        return {"status": "OK"}
+    else:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь с таким email уже существует!")
 
 
 @router.post("/login", summary="Авторизация клиента")
