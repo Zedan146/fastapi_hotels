@@ -43,9 +43,6 @@ class BookingsRepository(BaseRepository):
         rooms_ids_db = result.scalars().all()
 
         if room_id not in rooms_ids_db:
-            raise HTTPException(status_code=404, detail="Нельзя забронировать комнату на выбранные даты!")
+            raise HTTPException(status_code=500, detail="Нельзя забронировать комнату на выбранные даты!")
 
-        add_data_stmt = insert(self.model).values({**data.model_dump()}).returning(self.model)
-        result = await self.session.execute(add_data_stmt)
-        model = result.scalars().one_or_none()
-        return self.mapper.map_to_domain_entity(model)
+        return await self.add(data)
