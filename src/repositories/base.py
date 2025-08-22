@@ -71,11 +71,8 @@ class BaseRepository:
         delete_stmt = (
             delete(self.model)
             .filter_by(**filter_by)
-            .returning(self.model)
         )
         try:
-
             await self.session.execute(delete_stmt)
-
         except IntegrityError:
             raise HTTPException(400, detail="Нельзя удалить: есть связанные ссылки. Сначала удалите их.")
