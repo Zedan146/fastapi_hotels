@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, Response, status
 
-from sqlalchemy.exc import IntegrityError
-
 from src.api.dependencies import UserIdDep, DBDep
+from src.exceptions import ObjectAlreadyExistsException
 from src.services.auth import AuthService
 from src.schemas.users import UserAdd, UserLogin, UserRequestAdd
 
@@ -23,13 +22,13 @@ async def register_user(data: UserRequestAdd, db: DBDep):
         await db.users.add(new_user_data)
         await db.session_commit()
 
-        return {"status": "OK"}
-    except IntegrityError:
+    except ObjectAlreadyExistsException:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Пользователь с таким email уже существует!",
         )
 
+    return {"status": "OK"}
 
 @router.post("/login", summary="Авторизация клиента")
 async def login_user(data: UserLogin, response: Response, db: DBDep):

@@ -1,11 +1,11 @@
 from datetime import date
 
-from fastapi import Query, APIRouter, Body, HTTPException
+from fastapi import Query, APIRouter, Body
 
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exceptions import ObjectNotFoundException
+from src.exceptions import ObjectNotFoundException, check_date_to_after_date_from, HotelNotFoundHTTPException
 from src.schemas.hotels import HotelPATCH, HotelAdd
 
 router = APIRouter(prefix="/hotels", tags=["Отели"])
@@ -17,7 +17,7 @@ async def get_one_hotel(hotel_id: int, db: DBDep):
     try:
         return await db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundHTTPException
 
 
 @router.get("", summary="Получение отелей")
@@ -31,8 +31,7 @@ async def get_hotels(
     date_to: date = Query(example="2025-08-07"),
 ):
     per_page = pagination.per_page or 5
-    if date_from >= date_to:
-        raise HTTPException(status_code=400, detail="Дата заезда должна быть меньше даты выезда!")
+    check_date_to_after_date_from(date_from, date_to)
 
     return await db.hotels.get_hotels_by_time(
         title=title,
@@ -72,9 +71,11 @@ async def create_hotel(
 @router.put("/{hotel_id}", summary="Изменение отеля")
 async def put_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
     try:
-        edit_data = await db.hotels.edit(hotel_data, id=hotel_id)
+        db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundHTTPException
+
+    edit_data = await db.hotels.edit(hotel_data, id=hotel_id)
     await db.session_commit()
     return {"status": "OK", "data": edit_data}
 
@@ -82,9 +83,11 @@ async def put_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
 @router.patch("/{hotel_id}", summary="Частичное изменение отеля")
 async def patch_hotel(hotel_id: int, hotel_data: HotelPATCH, db: DBDep):
     try:
-        edit_data = await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
+        db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundHTTPException
+
+    edit_data = await db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
     await db.session_commit()
 
     return {"status": "OK", "data": edit_data}
@@ -93,8 +96,10 @@ async def patch_hotel(hotel_id: int, hotel_data: HotelPATCH, db: DBDep):
 @router.delete("/{hotel_id}", summary="Удаление отеля")
 async def delete_hotel(hotel_id: int, db: DBDep):
     try:
-        await db.hotels.delete(id=hotel_id)
+        db.hotels.get_one(id=hotel_id)
     except ObjectNotFoundException:
-        raise HTTPException(status_code=404, detail="Отель не найден")
+        raise HotelNotFoundHTTPException
+
+    await db.hotels.delete(id=hotel_id)
     await db.session_commit()
     return {"status": "OK!"}

@@ -3,8 +3,6 @@ from datetime import date
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from fastapi import HTTPException
-
 from src.exceptions import AllRoomsAreBookedException
 from src.models import RoomsModel
 from src.models.bookings import BookingsModel
