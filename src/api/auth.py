@@ -10,7 +10,7 @@ router = APIRouter(prefix="/auth", tags=["Авторизация и аутент
 @router.post("/register", summary="Регистрация клиента")
 async def register_user(data: UserRequestAdd, db: DBDep):
     hashed_password = AuthService().hash_password(data.password)
-    if not await db.users.get_filtered(email=data.email):
+    try:
         new_user_data = UserAdd(
             first_name=data.first_name,
             last_name=data.last_name,
@@ -22,7 +22,7 @@ async def register_user(data: UserRequestAdd, db: DBDep):
         await db.session_commit()
 
         return {"status": "OK"}
-    else:
+    except:  # noqa: E722
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь с таким email уже существует!")
 
 

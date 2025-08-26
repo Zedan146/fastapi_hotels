@@ -1,14 +1,14 @@
 from datetime import date
 
 from pydantic import BaseModel
-from sqlalchemy import select, insert
+from sqlalchemy import select
 
 from fastapi import HTTPException
 
 from src.models import RoomsModel
 from src.models.bookings import BookingsModel
 from src.repositories.base import BaseRepository
-from src.repositories.mappers.mappers import BookingDataMapper, RoomWithRelsDataMapper
+from src.repositories.mappers.mappers import BookingDataMapper
 from src.repositories.utils import rooms_ids_for_booking
 
 

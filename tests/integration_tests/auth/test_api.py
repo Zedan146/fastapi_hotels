@@ -5,8 +5,10 @@ import pytest
     ("test@api.com", 'testpassword123', "name", 'lastname', "username", 200),
     ("test@api.com", 'testpassword123', "name", 'lastname', "username", 409),
     ("test2@api.com", 'testpassword123', "name", 'lastname', "username", 200),
+    ("test", 'testpassword123', "name", 'lastname', "username", 422),
+    ("test2@api", 'testpassword123', "name", 'lastname', "username", 422),
 ])
-async def test_register_user(
+async def test_auth_flow(
         email,
         password,
         first_name,
@@ -15,6 +17,7 @@ async def test_register_user(
         status_code,
         ac
 ):
+    # /register
     response_register = await ac.post(
         "auth/register",
         json={
@@ -26,9 +29,10 @@ async def test_register_user(
         }
     )
     assert response_register.status_code == status_code
-    if status_code == 200:
-        assert response_register.json()["status"] == "OK"
+    if status_code != 200:
+        return
 
+    # /login
     response_login = await ac.post(
         "/auth/login",
         json={
@@ -39,6 +43,7 @@ async def test_register_user(
     assert response_login.status_code == 200
     assert ac.cookies["access_token"]
 
+    # /me
     response_me = await ac.get(
         "/auth/me",
     )
@@ -48,8 +53,11 @@ async def test_register_user(
     assert user["first_name"] == first_name
     assert user["last_name"] == last_name
     assert user["username"] == username
+    assert "password" not in user
+    assert "hashed_password" not in user
     assert ac.cookies["access_token"]
 
+    # /logout
     response_logout = await ac.post("/auth/logout")
     assert response_logout.status_code == 200
     assert "access_token" not in ac.cookies
