@@ -1,11 +1,10 @@
-from typing import Sequence
-
-from fastapi import HTTPException
+from typing import Sequence, Any
 
 from sqlalchemy import select, insert, update, delete
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import NoResultFound
 from pydantic import BaseModel
 
+from src.exceptions import ObjectNotFoundException
 from src.repositories.mappers.base import DataMapper
 
 
@@ -26,12 +25,22 @@ class BaseRepository:
     async def get_all(self):
         return await self.get_filtered()
 
-    async def get_one_or_none(self, **filter_by):
+    async def get_one_or_none(self, **filter_by) -> BaseModel | None | Any:
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
         if model is None:
             return None
+        return self.mapper.map_to_domain_entity(model)
+
+    async def get_one(self, **filter_by) -> BaseModel:
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, **kwargs):
@@ -54,7 +63,11 @@ class BaseRepository:
             .returning(self.model)
         )
         result = await self.session.execute(edit_stmt)
-        model = result.scalars().one_or_none()
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException
+
         return self.mapper.map_to_domain_entity(model)
 
     async def edit_bulk(
@@ -68,10 +81,9 @@ class BaseRepository:
         await self.session.execute(edit_stmt)
 
     async def delete(self, **filter_by) -> None:
-        delete_stmt = delete(self.model).filter_by(**filter_by)
+        delete_stmt = delete(self.model).filter_by(**filter_by).returning(self.model)
+        result = await self.session.execute(delete_stmt)
         try:
-            await self.session.execute(delete_stmt)
-        except IntegrityError:
-            raise HTTPException(
-                400, detail="Нельзя удалить: есть связанные ссылки. Сначала удалите их."
-            )
+            result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFoundException

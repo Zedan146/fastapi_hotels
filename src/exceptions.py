@@ -1,0 +1,17 @@
+class NabronirovalException(Exception):
+    detail = "Неожиданная ошибка"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self.detail, *args)
+
+
+class ObjectNotFoundException(NabronirovalException):
+    detail = "Объект не найден"
+
+
+class RoomNotFoundException(NabronirovalException):
+    detail = "Номер не найден"
+
+
+class AllRoomsAreBookedException(NabronirovalException):
+    detail = "Не осталось свободных номеров"

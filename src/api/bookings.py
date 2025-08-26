@@ -3,7 +3,9 @@ from datetime import date
 from fastapi import APIRouter, Body, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
+from src.exceptions import RoomNotFoundException, AllRoomsAreBookedException
 from src.schemas.bookings import BookingAdd, BookingAddRequest
+from src.schemas.rooms import Room
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
@@ -46,17 +48,21 @@ async def create_booking(
         }
     ),
 ):
-    room_data = await db.rooms.get_one_or_none(id=booking_data.room_id)
+    try:
+        room_data: Room | None = await db.rooms.get_one(id=booking_data.room_id)
+    except RoomNotFoundException:
+        raise HTTPException(status_code=404, detail="Номер не найден")
     hotel_id = room_data.hotel_id
-    if not room_data:
-        raise HTTPException(status_code=404, detail="Номера с таким id не существует!")
     _booking_data = BookingAdd(user_id=user_id, price=room_data.price, **booking_data.model_dump())
-    await db.bookings.add_booking(
-        _booking_data,
-        hotel_id,
-        _booking_data.room_id,
-        _booking_data.date_from,
-        _booking_data.date_to,
-    )
+    try:
+        await db.bookings.add_booking(
+            _booking_data,
+            hotel_id,
+            _booking_data.room_id,
+            _booking_data.date_from,
+            _booking_data.date_to,
+        )
+    except AllRoomsAreBookedException as ex:
+        raise HTTPException(status_code=409, detail=ex.detail)
     await db.session_commit()
     return {"status": "OK", "data": _booking_data}

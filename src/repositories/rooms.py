@@ -1,8 +1,12 @@
 from datetime import date
+from typing import Any
 
+from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import selectinload
 
+from src.exceptions import RoomNotFoundException
 from src.repositories.base import BaseRepository
 from src.models.rooms import RoomsModel
 from src.repositories.mappers.mappers import RoomDataMapper, RoomWithRelsDataMapper
@@ -26,7 +30,7 @@ class RoomsRepository(BaseRepository):
             RoomWithRelsDataMapper.map_to_domain_entity(model) for model in result.scalars().all()
         ]
 
-    async def get_one_or_none(self, **filter_by):
+    async def get_one_or_none(self, **filter_by) -> BaseModel | None | Any:
         query = (
             select(self.model).options(selectinload(self.model.facilities)).filter_by(**filter_by)
         )
@@ -34,4 +38,15 @@ class RoomsRepository(BaseRepository):
         model = result.scalars().one_or_none()
         if model is None:
             return None
+        return RoomWithRelsDataMapper.map_to_domain_entity(model)
+
+    async def get_one(self, **filter_by) -> BaseModel:
+        query = (
+            select(self.model).options(selectinload(self.model.facilities)).filter_by(**filter_by)
+        )
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise RoomNotFoundException
         return RoomWithRelsDataMapper.map_to_domain_entity(model)

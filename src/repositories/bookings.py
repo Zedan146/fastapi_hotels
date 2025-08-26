@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from fastapi import HTTPException
 
+from src.exceptions import AllRoomsAreBookedException
 from src.models import RoomsModel
 from src.models.bookings import BookingsModel
 from src.repositories.base import BaseRepository
@@ -36,9 +37,6 @@ class BookingsRepository(BaseRepository):
         rooms_ids_db = result.scalars().all()
 
         if room_id not in rooms_ids_db:
-            raise HTTPException(
-                status_code=500,
-                detail="Нельзя забронировать комнату на выбранные даты!",
-            )
+            raise AllRoomsAreBookedException
 
         return await self.add(data)
