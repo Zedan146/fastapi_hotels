@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from fastapi import HTTPException
 
 from sqlalchemy import select, insert, update, delete
@@ -40,7 +42,7 @@ class BaseRepository:
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
 
-    async def add_bulk(self, data: list[BaseModel]):
+    async def add_bulk(self, data: Sequence[BaseModel]):
         add_data_stmt = insert(self.model).values([item.model_dump() for item in data])
         await self.session.execute(add_data_stmt)
 

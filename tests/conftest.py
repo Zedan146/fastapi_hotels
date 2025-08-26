@@ -1,5 +1,6 @@
 # ruff: noqa: E402
 import json
+from typing import AsyncGenerator, Any
 from unittest import mock
 
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
@@ -23,7 +24,7 @@ async def get_db_null_pool():
 
 
 @pytest.fixture(scope="function")
-async def db() -> DBManager:
+async def db() -> AsyncGenerator[DBManager, Any]:
     async for db in get_db_null_pool():
         yield db
 
@@ -32,7 +33,7 @@ app.dependency_overrides[get_db] = get_db_null_pool
 
 
 @pytest.fixture(scope="session")
-async def ac() -> AsyncClient:
+async def ac() -> AsyncGenerator[AsyncClient, Any]:
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac
 
@@ -66,7 +67,7 @@ async def add_data_in_database(setup_database):
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def register_user(add_data_in_database, ac):
+async def register_user(add_data_in_database, ac: AsyncClient):
     await ac.post(
         "/auth/register",
         json={
@@ -80,7 +81,7 @@ async def register_user(add_data_in_database, ac):
 
 
 @pytest.fixture(scope="session")
-async def authenticated_ac(register_user, ac):
+async def authenticated_ac(register_user, ac: AsyncClient):
     response = await ac.post(
         "/auth/login",
         json={
