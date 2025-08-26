@@ -1,3 +1,5 @@
+import logging
+
 import redis.asyncio as redis
 
 
@@ -10,7 +12,9 @@ class RedisManager:
 
     async def connector(self):
         """Устанавливает асинхронное подключение к Redis."""
+        logging.info(f"Подключение к Redis host={self.host}, port={self.port}")
         self.redis = await redis.Redis(host=self.host, port=self.port, password=self.password)
+        logging.info(f"Успешное подключение к Redis host={self.host}, port={self.port}")
 
     async def set(self, key: str, value: str, expire: int = None):
         """Сохраняет значение в Redis с возможностью указания времени экспирации"""

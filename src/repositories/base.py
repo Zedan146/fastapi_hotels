@@ -1,4 +1,5 @@
 from typing import Sequence, Any
+import logging
 
 from asyncpg.exceptions import UniqueViolationError
 
@@ -57,6 +58,7 @@ class BaseRepository:
             if isinstance(ex.orig.__cause__, UniqueViolationError):
                 raise ObjectAlreadyExistsException from ex
             else:
+                logging.error(f"Неизвестная ошибка: {type(ex.orig.__cause__)=}")
                 raise ex
 
     async def add_bulk(self, data: Sequence[BaseModel]):

@@ -30,6 +30,7 @@ async def register_user(data: UserRequestAdd, db: DBDep):
 
     return {"status": "OK"}
 
+
 @router.post("/login", summary="Авторизация клиента")
 async def login_user(data: UserLogin, response: Response, db: DBDep):
     user = await db.users.get_user_with_hashed_password(email=data.email)
