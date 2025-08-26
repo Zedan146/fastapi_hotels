@@ -16,22 +16,18 @@ class BaseRepository:
         self.session = session
 
     async def get_filtered(self, *filters, **filter_by):
-        query = (
-            select(self.model)
-            .filter(*filters)
-            .filter_by(**filter_by)
-        )
+        query = select(self.model).filter(*filters).filter_by(**filter_by)
         # print(query.compile(compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
-        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
+        return [
+            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
+        ]
 
     async def get_all(self):
         return await self.get_filtered()
 
     async def get_one_or_none(self, **filter_by):
-        query = (
-            select(self.model)
-            .filter_by(**filter_by))
+        query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
         if model is None:
@@ -39,7 +35,11 @@ class BaseRepository:
         return self.mapper.map_to_domain_entity(model)
 
     async def add(self, data: BaseModel, **kwargs):
-        add_data_stmt = insert(self.model).values({**data.model_dump(), **kwargs}).returning(self.model)
+        add_data_stmt = (
+            insert(self.model)
+            .values({**data.model_dump(), **kwargs})
+            .returning(self.model)
+        )
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().one()
         return self.mapper.map_to_domain_entity(model)
@@ -59,7 +59,9 @@ class BaseRepository:
         model = result.scalars().one_or_none()
         return self.mapper.map_to_domain_entity(model)
 
-    async def edit_bulk(self, data: list[BaseModel], exclude_unset: bool = False, **filter_by) -> None:
+    async def edit_bulk(
+        self, data: list[BaseModel], exclude_unset: bool = False, **filter_by
+    ) -> None:
         edit_stmt = (
             update(self.model)
             .filter_by(**filter_by)
@@ -68,11 +70,10 @@ class BaseRepository:
         await self.session.execute(edit_stmt)
 
     async def delete(self, **filter_by) -> None:
-        delete_stmt = (
-            delete(self.model)
-            .filter_by(**filter_by)
-        )
+        delete_stmt = delete(self.model).filter_by(**filter_by)
         try:
             await self.session.execute(delete_stmt)
         except IntegrityError:
-            raise HTTPException(400, detail="Нельзя удалить: есть связанные ссылки. Сначала удалите их.")
+            raise HTTPException(
+                400, detail="Нельзя удалить: есть связанные ссылки. Сначала удалите их."
+            )

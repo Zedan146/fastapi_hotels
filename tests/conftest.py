@@ -11,7 +11,7 @@ from src.api.dependencies import get_db
 from src.config import settings
 from src.database import engine_null_pool, Base, async_session_maker_null_pool
 from src.main import app
-from src.models import * # noqa
+from src.models import *  # noqa
 from src.schemas.hotels import HotelAdd
 from src.schemas.rooms import RoomAdd
 from src.utils.db_manager import DBManager
@@ -26,6 +26,7 @@ async def get_db_null_pool():
 async def db() -> DBManager:
     async for db in get_db_null_pool():
         yield db
+
 
 app.dependency_overrides[get_db] = get_db_null_pool
 
@@ -73,8 +74,8 @@ async def register_user(add_data_in_database, ac):
             "password": "1234",
             "first_name": "Name",
             "last_name": "Name",
-            "username": "username"
-        }
+            "username": "username",
+        },
     )
 
 
@@ -85,9 +86,8 @@ async def authenticated_ac(register_user, ac):
         json={
             "email": "test@example.com",
             "password": "1234",
-        }
+        },
     )
     assert response.status_code == 200
     assert ac.cookies["access_token"]
     yield ac
-

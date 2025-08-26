@@ -23,37 +23,42 @@ async def get_user_bookings(user_id: UserIdDep, db: DBDep):
 
 @router.post("", summary="Добавление бронирования")
 async def create_booking(
-        user_id: UserIdDep,
-        db: DBDep,
-        booking_data: BookingAddRequest = Body(openapi_examples={
-        "1": {
-            "summary": "Бронирование 1",
-            "value": {
-                "room_id": 1,
-                "date_from": date.today(),
-                "date_to": date.today()
-            }
-        },
-        "2": {
-            "summary": "Бронирование 2",
-            "value": {
-                "room_id": 2,
-                "date_from": "2026-10-27",
-                "date_to": "2026-11-02"
-            }
+    user_id: UserIdDep,
+    db: DBDep,
+    booking_data: BookingAddRequest = Body(
+        openapi_examples={
+            "1": {
+                "summary": "Бронирование 1",
+                "value": {
+                    "room_id": 1,
+                    "date_from": date.today(),
+                    "date_to": date.today(),
+                },
+            },
+            "2": {
+                "summary": "Бронирование 2",
+                "value": {
+                    "room_id": 2,
+                    "date_from": "2026-10-27",
+                    "date_to": "2026-11-02",
+                },
+            },
         }
-        })):
+    ),
+):
     room_data = await db.rooms.get_one_or_none(id=booking_data.room_id)
     hotel_id = room_data.hotel_id
     if not room_data:
         raise HTTPException(status_code=404, detail="Номера с таким id не существует!")
-    _booking_data = BookingAdd(user_id=user_id, price=room_data.price, **booking_data.model_dump())
+    _booking_data = BookingAdd(
+        user_id=user_id, price=room_data.price, **booking_data.model_dump()
+    )
     await db.bookings.add_booking(
         _booking_data,
         hotel_id,
         _booking_data.room_id,
         _booking_data.date_from,
-        _booking_data.date_to
+        _booking_data.date_to,
     )
     await db.session_commit()
     return {"status": "OK", "data": _booking_data}

@@ -44,4 +44,3 @@ class UserWithHashedPasswordDataMapper(DataMapper):
 class BookingDataMapper(DataMapper):
     db_model = BookingsModel
     schema = Booking
-

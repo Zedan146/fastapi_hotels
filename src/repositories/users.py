@@ -3,7 +3,10 @@ from sqlalchemy import select
 
 from src.models.users import UsersModel
 from src.repositories.base import BaseRepository
-from src.repositories.mappers.mappers import UserDataMapper, UserWithHashedPasswordDataMapper
+from src.repositories.mappers.mappers import (
+    UserDataMapper,
+    UserWithHashedPasswordDataMapper,
+)
 
 
 class UsersRepository(BaseRepository):

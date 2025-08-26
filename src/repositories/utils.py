@@ -7,9 +7,9 @@ from src.models.rooms import RoomsModel
 
 
 def rooms_ids_for_booking(
-        date_from: date,
-        date_to: date,
-        hotel_id: int | None = None,
+    date_from: date,
+    date_to: date,
+    hotel_id: int | None = None,
 ):
     """
     with rooms_count as (
@@ -28,36 +28,31 @@ def rooms_ids_for_booking(
     where rooms_left > 0
     """
     rooms_count = (
-        select(BookingsModel.room_id, func.count("*").label('rooms_booked'))
+        select(BookingsModel.room_id, func.count("*").label("rooms_booked"))
         .select_from(BookingsModel)
-        .filter(
-            BookingsModel.date_from <= date_to,
-            BookingsModel.date_to >= date_from
-        )
+        .filter(BookingsModel.date_from <= date_to, BookingsModel.date_to >= date_from)
         .group_by(BookingsModel.room_id)
-        .cte(name='rooms_count')
+        .cte(name="rooms_count")
     )
 
     rooms_left_table = (
         select(
             RoomsModel.id.label("room_id"),
-            (RoomsModel.quantity - func.coalesce(rooms_count.c.rooms_booked, 0)).label("rooms_left")
+            (RoomsModel.quantity - func.coalesce(rooms_count.c.rooms_booked, 0)).label(
+                "rooms_left"
+            ),
         )
         .select_from(RoomsModel)
         .outerjoin(rooms_count, RoomsModel.id == rooms_count.c.room_id)
         .cte(name="rooms_left_table")
     )
 
-    rooms_ids_for_hotel = (
-        select(RoomsModel.id)
-        .select_from(RoomsModel)
-    )
+    rooms_ids_for_hotel = select(RoomsModel.id).select_from(RoomsModel)
     if hotel_id is not None:
         rooms_ids_for_hotel = rooms_ids_for_hotel.filter_by(hotel_id=hotel_id)
 
-    get_rooms_ids_for_hotel = (
-        rooms_ids_for_hotel
-        .subquery(name="get_rooms_ids_for_hotel")
+    get_rooms_ids_for_hotel = rooms_ids_for_hotel.subquery(
+        name="get_rooms_ids_for_hotel"
     )
 
     rooms_ids_to_get = (
@@ -65,7 +60,7 @@ def rooms_ids_for_booking(
         .select_from(rooms_left_table)
         .filter(
             rooms_left_table.c.rooms_left > 0,
-            rooms_left_table.c.room_id.in_(get_rooms_ids_for_hotel)
+            rooms_left_table.c.room_id.in_(get_rooms_ids_for_hotel),
         )
     )
 

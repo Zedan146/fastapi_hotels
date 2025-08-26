@@ -7,12 +7,7 @@ async def test_get_facilities(ac):
 
 async def test_create_facility(ac):
     facility_title = "WI-FI"
-    response = await ac.post(
-        "/facilities",
-        json={
-            "title": facility_title
-        }
-    )
+    response = await ac.post("/facilities", json={"title": facility_title})
     res = response.json()
 
     assert response.status_code == 200

@@ -19,12 +19,12 @@ async def get_one_hotel(hotel_id: int, db: DBDep):
 @router.get("", summary="Получение отелей")
 @cache(expire=10)
 async def get_hotels(
-        pagination: PaginationDep,
-        db: DBDep,
-        title: str | None = Query(None, description='Название отеля'),
-        location: str | None = Query(None, description="Адрес отеля"),
-        date_from: date = Query(example='2025-08-01'),
-        date_to: date = Query(example='2025-08-07'),
+    pagination: PaginationDep,
+    db: DBDep,
+    title: str | None = Query(None, description="Название отеля"),
+    location: str | None = Query(None, description="Адрес отеля"),
+    date_from: date = Query(example="2025-08-01"),
+    date_to: date = Query(example="2025-08-07"),
 ):
     per_page = pagination.per_page or 5
 
@@ -34,27 +34,29 @@ async def get_hotels(
         date_from=date_from,
         date_to=date_to,
         limit=per_page,
-        offset=per_page * (pagination.page - 1)
+        offset=per_page * (pagination.page - 1),
     )
 
 
 @router.post("", summary="Добавление отеля")
-async def create_hotel(db: DBDep, hotel_data: HotelAdd = Body(openapi_examples={
-    "1": {
-        "summary": "Сочи",
-        "value": {
-            "title": "Отель Бирсон",
-            "location": "Сочи, ул. Матросова, 13"
+async def create_hotel(
+    db: DBDep,
+    hotel_data: HotelAdd = Body(
+        openapi_examples={
+            "1": {
+                "summary": "Сочи",
+                "value": {
+                    "title": "Отель Бирсон",
+                    "location": "Сочи, ул. Матросова, 13",
+                },
+            },
+            "2": {
+                "summary": "Дубай",
+                "value": {"title": "Аль-Халиф", "location": "Дубай, ул. Кан, 3"},
+            },
         }
-    },
-    "2": {
-        "summary": "Дубай",
-        "value": {
-            "title": "Аль-Халиф",
-            "location": "Дубай, ул. Кан, 3"
-        }
-    }
-})):
+    ),
+):
     hotel = await db.hotels.add(hotel_data)
     await db.session_commit()
 

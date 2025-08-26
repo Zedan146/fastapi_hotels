@@ -16,14 +16,17 @@ async def register_user(data: UserRequestAdd, db: DBDep):
             last_name=data.last_name,
             username=data.username,
             email=data.email,
-            hashed_password=hashed_password
+            hashed_password=hashed_password,
         )
         await db.users.add(new_user_data)
         await db.session_commit()
 
         return {"status": "OK"}
     except:  # noqa: E722
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Пользователь с таким email уже существует!")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Пользователь с таким email уже существует!",
+        )
 
 
 @router.post("/login", summary="Авторизация клиента")
@@ -36,7 +39,7 @@ async def login_user(data: UserLogin, response: Response, db: DBDep):
     access_token = AuthService().create_access_token({"user_id": user.id})
     response.set_cookie("access_token", access_token)
     return {"access_token": access_token}
-    
+
 
 @router.get("/me", summary="Получение текущего пользователя")
 async def get_me(user_id: UserIdDep, db: DBDep):

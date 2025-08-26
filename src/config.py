@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str
     REDIS_USER: str
 
-    model_config = SettingsConfigDict(env_file='.env')
+    model_config = SettingsConfigDict(env_file=".env")
 
 
 settings = Settings()
