@@ -17,13 +17,9 @@ class RoomFacilitiesRepository(BaseRepository):
     schema = RoomFacility
     mapper = FacilityDataMapper
 
-    async def edit_room_with_facilities(
-        self, room_id: int, facilities_ids: list[int]
-    ) -> None:
+    async def edit_room_with_facilities(self, room_id: int, facilities_ids: list[int]) -> None:
         get_current_facilities_ids_query = await self.session.execute(
-            select(self.model.facility_id)
-            .select_from(self.model)
-            .filter_by(room_id=room_id)
+            select(self.model.facility_id).select_from(self.model).filter_by(room_id=room_id)
         )
         current_facilities_ids = get_current_facilities_ids_query.scalars().all()
 

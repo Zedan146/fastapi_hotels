@@ -11,9 +11,7 @@ import pytest
         ("test2@api", "testpassword123", "name", "lastname", "username", 422),
     ],
 )
-async def test_auth_flow(
-    email, password, first_name, last_name, username, status_code, ac
-):
+async def test_auth_flow(email, password, first_name, last_name, username, status_code, ac):
     # /register
     response_register = await ac.post(
         "auth/register",
@@ -30,9 +28,7 @@ async def test_auth_flow(
         return
 
     # /login
-    response_login = await ac.post(
-        "/auth/login", json={"email": email, "password": password}
-    )
+    response_login = await ac.post("/auth/login", json={"email": email, "password": password})
     assert response_login.status_code == 200
     assert ac.cookies["access_token"]
 

@@ -19,9 +19,7 @@ class BaseRepository:
         query = select(self.model).filter(*filters).filter_by(**filter_by)
         # print(query.compile(compile_kwargs={"literal_binds": True}))
         result = await self.session.execute(query)
-        return [
-            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
-        ]
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
 
     async def get_all(self):
         return await self.get_filtered()
@@ -36,9 +34,7 @@ class BaseRepository:
 
     async def add(self, data: BaseModel, **kwargs):
         add_data_stmt = (
-            insert(self.model)
-            .values({**data.model_dump(), **kwargs})
-            .returning(self.model)
+            insert(self.model).values({**data.model_dump(), **kwargs}).returning(self.model)
         )
         result = await self.session.execute(add_data_stmt)
         model = result.scalars().one()

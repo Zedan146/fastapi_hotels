@@ -10,9 +10,7 @@ class RedisManager:
 
     async def connector(self):
         """Устанавливает асинхронное подключение к Redis."""
-        self.redis = await redis.Redis(
-            host=self.host, port=self.port, password=self.password
-        )
+        self.redis = await redis.Redis(host=self.host, port=self.port, password=self.password)
 
     async def set(self, key: str, value: str, expire: int = None):
         """Сохраняет значение в Redis с возможностью указания времени экспирации"""

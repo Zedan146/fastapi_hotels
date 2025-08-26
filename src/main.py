@@ -43,9 +43,7 @@ app.include_router(router_facilities)
 app.include_router(router_images)
 
 
-@app.get(
-    "/", tags=["Шаблоны"], summary="Домашняя страница", response_class=HTMLResponse
-)
+@app.get("/", tags=["Шаблоны"], summary="Домашняя страница", response_class=HTMLResponse)
 def home():
     return """
     <a href="http://127.0.0.1:8000/docs">Docs</a><br>

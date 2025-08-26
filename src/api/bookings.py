@@ -50,9 +50,7 @@ async def create_booking(
     hotel_id = room_data.hotel_id
     if not room_data:
         raise HTTPException(status_code=404, detail="Номера с таким id не существует!")
-    _booking_data = BookingAdd(
-        user_id=user_id, price=room_data.price, **booking_data.model_dump()
-    )
+    _booking_data = BookingAdd(user_id=user_id, price=room_data.price, **booking_data.model_dump())
     await db.bookings.add_booking(
         _booking_data,
         hotel_id,

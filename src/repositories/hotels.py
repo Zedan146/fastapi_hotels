@@ -64,9 +64,7 @@ class HotelsRepository(BaseRepository):
         query = select(HotelsModel).filter(HotelsModel.id.in_(hotels_ids_to_get))
 
         if title:
-            query = query.filter(
-                func.lower(HotelsModel.title).contains(title.strip().lower())
-            )
+            query = query.filter(func.lower(HotelsModel.title).contains(title.strip().lower()))
         if location:
             query = query.filter(
                 func.lower(HotelsModel.location).contains(location.strip().lower())
@@ -75,6 +73,4 @@ class HotelsRepository(BaseRepository):
 
         result = await self.session.execute(query)
 
-        return [
-            self.mapper.map_to_domain_entity(model) for model in result.scalars().all()
-        ]
+        return [self.mapper.map_to_domain_entity(model) for model in result.scalars().all()]
