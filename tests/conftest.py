@@ -3,6 +3,8 @@ import json
 from typing import AsyncGenerator, Any
 from unittest import mock
 
+from src.schemas.facilities import FacilityAdd
+
 mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f).start()
 
 import pytest
@@ -56,13 +58,17 @@ async def add_data_in_database(setup_database):
         hotels_data = json.load(file_hotels)
     with open("tests/mock_rooms.json", "r") as file_rooms:
         rooms_data = json.load(file_rooms)
+    with open("tests/mock_facilities.json", "r") as file_facilities:
+        facilities_data = json.load(file_facilities)
 
     hotels = [HotelAdd.model_validate(hotel) for hotel in hotels_data]
     rooms = [RoomAdd.model_validate(room) for room in rooms_data]
+    facilities = [FacilityAdd.model_validate(facility) for facility in facilities_data]
 
     async with DBManager(session_factory=async_session_maker_null_pool) as db_:
         await db_.hotels.add_bulk(hotels)
         await db_.rooms.add_bulk(rooms)
+        await db_.facilities.add_bulk(facilities)
         await db_.session_commit()
 
 
