@@ -92,3 +92,13 @@ async def authenticated_ac(register_user, ac: AsyncClient):
     assert response.status_code == 200
     assert ac.cookies["access_token"]
     yield ac
+
+
+@pytest.fixture
+async def original_hotel_data(ac, hotel_id):
+    """Получает исходные данные отеля перед тестом"""
+    if hotel_id in [1, 2, 3]:  # Только для существующих отелей
+        response = await ac.get(f"/hotels/{hotel_id}")
+        if response.status_code == 200:
+            return response.json()
+    return None

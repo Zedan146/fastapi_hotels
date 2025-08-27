@@ -1,13 +1,13 @@
 from typing import Sequence, Any
 import logging
 
-from asyncpg.exceptions import UniqueViolationError
+from asyncpg.exceptions import UniqueViolationError, PostgresSyntaxError
 
 from sqlalchemy import select, insert, update, delete
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import NoResultFound, IntegrityError, ProgrammingError
 from pydantic import BaseModel
 
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException
+from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, NoDataHasBeenTransmitted
 from src.repositories.mappers.base import DataMapper
 
 
@@ -66,16 +66,23 @@ class BaseRepository:
         await self.session.execute(add_data_stmt)
 
     async def edit(self, data: BaseModel, exclude_unset: bool = False, **filter_by):
-        edit_stmt = (
-            update(self.model)
-            .filter_by(**filter_by)
-            .values(**data.model_dump(exclude_unset=exclude_unset))
-            .returning(self.model)
-        )
-        result = await self.session.execute(edit_stmt)
-        model = result.scalar_one()
+        try:
+            edit_stmt = (
+                update(self.model)
+                .filter_by(**filter_by)
+                .values(**data.model_dump(exclude_unset=exclude_unset))
+                .returning(self.model)
+            )
+            result = await self.session.execute(edit_stmt)
+            model = result.scalar_one()
 
-        return self.mapper.map_to_domain_entity(model)
+            return self.mapper.map_to_domain_entity(model)
+        except ProgrammingError as ex:
+            if isinstance(ex.orig.__cause__, PostgresSyntaxError):
+                raise NoDataHasBeenTransmitted from ex
+            else:
+                logging.error(f"Неизвестная ошибка: {type(ex.orig.__cause__)=}")
+                raise ex
 
     async def edit_bulk(
         self, data: list[BaseModel], exclude_unset: bool = False, **filter_by

@@ -1,11 +1,11 @@
 from datetime import date
 
-from fastapi import Query, APIRouter, Body
+from fastapi import Query, APIRouter, Body, HTTPException
 
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exceptions import ObjectNotFoundException, HotelNotFoundHTTPException
+from src.exceptions import ObjectNotFoundException, HotelNotFoundHTTPException, NoDataHasBeenTransmitted
 from src.schemas.hotels import HotelPATCH, HotelAdd
 from src.services.hotels import HotelService
 
@@ -76,9 +76,11 @@ async def put_hotel(hotel_id: int, hotel_data: HotelAdd, db: DBDep):
 @router.patch("/{hotel_id}", summary="Частичное изменение отеля")
 async def patch_hotel(hotel_id: int, hotel_data: HotelPATCH, db: DBDep):
     try:
-        await HotelService(db).edit_hotel_partially(hotel_id, hotel_data)
+        await HotelService(db).edit_hotel_partially(hotel_id, hotel_data, exclude_unset=True)
     except ObjectNotFoundException:
         raise HotelNotFoundHTTPException
+    except NoDataHasBeenTransmitted:
+        raise HTTPException(status_code=400, detail="Данные для изменения не переданы")
 
     return {"status": "OK"}
 

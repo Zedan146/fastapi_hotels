@@ -44,6 +44,10 @@ class RoomNotFoundHTTPException(NabronirovalHTTPException):
     detail = "Номер не найден"
 
 
+class NoDataHasBeenTransmitted(NabronirovalException):
+    detail = "Данные не переданы"
+
+
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
     if date_from >= date_to:
         raise HTTPException(status_code=422, detail="Дата заезда должна быть меньше даты выезда!")

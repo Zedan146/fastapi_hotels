@@ -35,19 +35,19 @@ class HotelService(BaseService):
         return hotel
 
     async def edit_hotel(self, hotel_id: int, hotel_data: HotelAdd):
-        self.db.hotels.get_one(id=hotel_id)
+        await self.db.hotels.get_one(id=hotel_id)
 
         await self.db.hotels.edit(hotel_data, id=hotel_id)
         await self.db.session_commit()
 
-    async def edit_hotel_partially(self, hotel_id: int, hotel_data: HotelPATCH):
-        self.db.hotels.get_one(id=hotel_id)
+    async def edit_hotel_partially(self, hotel_id: int, hotel_data: HotelPATCH, exclude_unset: bool = False):
+        await self.db.hotels.get_one(id=hotel_id)
 
-        await self.db.hotels.edit(hotel_data, exclude_unset=True, id=hotel_id)
+        await self.db.hotels.edit(hotel_data, exclude_unset=exclude_unset, id=hotel_id)
         await self.db.session_commit()
 
     async def delete_hotel(self, hotel_id: int):
-        self.db.hotels.get_one(id=hotel_id)
+        await self.db.hotels.get_one(id=hotel_id)
 
         await self.db.hotels.delete(id=hotel_id)
         await self.db.session_commit()
