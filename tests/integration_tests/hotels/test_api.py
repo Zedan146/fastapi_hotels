@@ -117,3 +117,13 @@ async def test_edit_hotel_partially(ac, hotel_id, update_data, status_code, orig
             assert json_get_hotel["location"] == original_hotel_data["location"]
 
 
+@pytest.mark.parametrize("hotel_id, status_code", [
+    (4, 200),
+    (5, 200),
+    (5, 404),
+])
+async def test_delete_hotels(ac, hotel_id, status_code):
+    response = await ac.delete(f"/hotels/{hotel_id}")
+
+    assert response.status_code == status_code
+
