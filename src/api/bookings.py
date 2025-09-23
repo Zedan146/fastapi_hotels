@@ -3,24 +3,24 @@ from datetime import date
 from fastapi import APIRouter, Body, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
-from src.exceptions import RoomNotFoundException, AllRoomsAreBookedException, RoomNotFoundHTTPException
-from src.schemas.bookings import BookingAdd, BookingAddRequest
-from src.schemas.rooms import Room
+from src.exceptions import AllRoomsAreBookedException
+from src.schemas.bookings import BookingAddRequest
+from src.services.bookings import BookingService
 
 router = APIRouter(prefix="/bookings", tags=["Бронирования"])
 
 
 @router.get("", summary="Получение всех бронирований")
 async def get_bookings(db: DBDep):
-    return await db.bookings.get_all()
+    return await BookingService(db).get_bookings()
 
 
 @router.get("/me", summary="Получение бронирований пользователя")
 async def get_user_bookings(user_id: UserIdDep, db: DBDep):
-    booking = await db.bookings.get_filtered(user_id=user_id)
-    if booking:
-        return booking
-    return {"message": "У вас еще нет бронирований"}
+    bookings = await BookingService(db).get_user_bookings(user_id)
+    if not bookings:
+        return {"message": "У вас еще нет бронирований"}
+    return bookings
 
 
 @router.post("", summary="Добавление бронирования")
@@ -49,20 +49,8 @@ async def create_booking(
     ),
 ):
     try:
-        room_data: Room | None = await db.rooms.get_one(id=booking_data.room_id)
-    except RoomNotFoundException:
-        raise RoomNotFoundHTTPException
-    hotel_id = room_data.hotel_id
-    _booking_data = BookingAdd(user_id=user_id, price=room_data.price, **booking_data.model_dump())
-    try:
-        await db.bookings.add_booking(
-            _booking_data,
-            hotel_id,
-            _booking_data.room_id,
-            _booking_data.date_from,
-            _booking_data.date_to,
-        )
+        booking = await BookingService(db).create_booking(user_id, booking_data)
     except AllRoomsAreBookedException as ex:
         raise HTTPException(status_code=409, detail=ex.detail)
-    await db.session_commit()
-    return {"status": "OK", "data": _booking_data}
+
+    return {"status": "OK", "data": booking}
