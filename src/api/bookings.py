@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Body, HTTPException
 
 from src.api.dependencies import DBDep, UserIdDep
-from src.exceptions import AllRoomsAreBookedException
+from src.exceptions import AllRoomsAreBookedException, AllRoomsAreBookedHTTPException
 from src.schemas.bookings import BookingAddRequest
 from src.services.bookings import BookingService
 
@@ -51,6 +51,6 @@ async def create_booking(
     try:
         booking = await BookingService(db).create_booking(user_id, booking_data)
     except AllRoomsAreBookedException as ex:
-        raise HTTPException(status_code=409, detail=ex.detail)
+        raise AllRoomsAreBookedHTTPException from ex
 
     return {"status": "OK", "data": booking}
