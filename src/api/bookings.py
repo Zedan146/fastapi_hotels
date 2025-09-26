@@ -1,6 +1,6 @@
 from datetime import date
 
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body
 
 from src.api.dependencies import DBDep, UserIdDep
 from src.exceptions import AllRoomsAreBookedException, AllRoomsAreBookedHTTPException
