@@ -1,4 +1,5 @@
 import pytest
+from httpx import AsyncClient
 
 
 @pytest.mark.parametrize("hotel_id, date_from, date_to, status_code", [
@@ -6,7 +7,14 @@ import pytest
     (1, "2024-08-20", "2024-08-10", 422),
     (2, "2024-08-01", "2025-09-10", 200),
 ])
-async def test_get_rooms(ac, hotel_id, date_from, date_to, status_code, add_data_in_database):
+async def test_get_rooms(
+        ac: AsyncClient,
+        hotel_id: int,
+        date_from: str,
+        date_to: str,
+        status_code: int,
+        add_data_in_database
+):
     response = await ac.get(
         f"/hotels/{hotel_id}/rooms",
         params={
@@ -27,7 +35,13 @@ async def test_get_rooms(ac, hotel_id, date_from, date_to, status_code, add_data
     (2, 5, 404, "Номер не найден"),
     (4, 2, 404, "Отель не найден"),
 ])
-async def test_get_room(ac, hotel_id, room_id, status_code, detail):
+async def test_get_room(
+        ac: AsyncClient,
+        hotel_id: int,
+        room_id: int,
+        status_code: int,
+        detail: str
+):
     response = await ac.get(
         f"/hotels/{hotel_id}/rooms/{room_id}",
         params={"hotel_id": hotel_id, "room_id": room_id}
@@ -49,7 +63,16 @@ async def test_get_room(ac, hotel_id, room_id, status_code, detail):
     (1, "Делюкс Плюс", 234, 250, 4, [], 422),
     (1, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [], 200),
 ])
-async def test_create_room(ac, hotel_id, title, description, price, quantity, facilities_ids, status_code):
+async def test_create_room(
+        ac: AsyncClient,
+        hotel_id: int,
+        title: str,
+        description: str,
+        price: int,
+        quantity: int,
+        facilities_ids: list[int],
+        status_code: int
+):
     response = await ac.post(
         f"/hotels/{hotel_id}/rooms",
         json={

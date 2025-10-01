@@ -3,7 +3,6 @@
 
 docker run --name booking_back -p 7777:8000 --network=myNetwork booking_image
 
-
 ### Образы(images)
 Создание образа    
 `docker build -t <имя-образа> .`
@@ -61,12 +60,11 @@ docker compose build
 ## Команды для проекта
 ### Создание Docker сети
 `docker network create myNetwork`
-"docker run --name booking_back -p 7777:8000 --network=myNetwork booking_image"
 
 ### База данных
 ```
 docker run --name booking_db \
-    -p 6432:5432 \
+    -p 6432:5432 \                                          
     -e POSTGRES_USER=abcde \    
     -e POSTGRES_PASSWORD=abcde \
     -e POSTGRES_DB=booking \
@@ -96,7 +94,7 @@ docker run --name booking_celery_worker \
 docker run --name booking_celery_beat \
     --network=myNetwork \
     booking_image \
-    celery --app=src.tasks.celery_app:celery_instance worker -l INFO
+    celery --app=src.tasks.celery_app:celery_instance beat -l INFO
 ```
 
 ### Nginx

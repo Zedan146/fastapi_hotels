@@ -33,7 +33,7 @@ async def lifespan(_: FastAPI):
 
     await redis_manager.connector()
     FastAPICache.init(RedisBackend(redis_manager.redis), prefix="fastapi-cache")
-    logging.info(f"✅  FastAPI cache initialized")
+    logging.info("✅  FastAPI cache initialized")
     yield
     await redis_manager.close()
 
