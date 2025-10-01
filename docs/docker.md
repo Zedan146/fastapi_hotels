@@ -66,7 +66,7 @@ docker compose build
 docker run --name booking_db \
     -p 6432:5432 \                                          
     -e POSTGRES_USER=abcde \    
-    -e POSTGRES_PASSWORD=abcde \
+    -e POSTGRES_PASSWORD=abdasd8as78d678asdasdjlcde \
     -e POSTGRES_DB=booking \
     --network=myNetwork \
     --volume pg-booking-data:/var/lib/postgresql/data \
