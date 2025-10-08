@@ -34,6 +34,10 @@ class UserAlreadyExistsException(NabronirovalException):
     detail = "Пользователь уже существует"
 
 
+class ValidationException(NabronirovalException):
+    detail = "Пожалуйста, заполните все поля"
+
+
 class ObjectNotFoundException(NabronirovalException):
     detail = "Объект не найден"
 
@@ -95,6 +99,11 @@ class IncorrectPasswordHTTPException(NabronirovalHTTPException):
 class NoAccessTokenHTTPException(NabronirovalHTTPException):
     status_code = 401
     detail = "Вы не предоставили токен доступа"
+
+
+class ValidationHTTPException(NabronirovalHTTPException):
+    status_code = 401
+    detail = "Пожалуйста, заполните все поля"
 
 
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:

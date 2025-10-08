@@ -1,7 +1,10 @@
 from datetime import date
 
+from pydantic import ValidationError
+
 from src.api.dependencies import PaginationDep
-from src.exceptions import check_date_to_after_date_from, ObjectNotFoundException, HotelNotFoundException
+from src.exceptions import check_date_to_after_date_from, ObjectNotFoundException, HotelNotFoundException, \
+    ObjectAlreadyExistsException, ValidationException
 from src.schemas.hotels import HotelAdd, HotelPATCH, Hotel
 from src.services.base import BaseService
 
@@ -30,6 +33,8 @@ class HotelService(BaseService):
         return await self.db.hotels.get_one(id=hotel_id)
 
     async def add_hotel(self, hotel_data: HotelAdd):
+        if await self.check_hotel_exists(hotel_data.location, hotel_data.title):
+            raise ObjectAlreadyExistsException
         hotel = await self.db.hotels.add(hotel_data)
         await self.db.session_commit()
         return hotel
@@ -57,3 +62,6 @@ class HotelService(BaseService):
             return await self.db.hotels.get_one(id=hotel_id)
         except ObjectNotFoundException:
             raise HotelNotFoundException
+
+    async def check_hotel_exists(self, location: str, title: str):
+        return await self.db.hotels.get_one_or_none(location=location, title=title)

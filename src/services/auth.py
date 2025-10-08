@@ -2,10 +2,11 @@ from datetime import datetime, timezone, timedelta
 
 from passlib.context import CryptContext
 import jwt
+from pydantic import ValidationError
 
 from src.config import settings
 from src.exceptions import IncorrectTokenException, ObjectAlreadyExistsException, UserAlreadyExistsException, \
-    EmailNotRegisteredException, IncorrectPasswordException
+    EmailNotRegisteredException, IncorrectPasswordException, ValidationException
 from src.schemas.users import UserRequestAdd, UserAdd, UserLogin
 from src.services.base import BaseService
 
@@ -39,14 +40,19 @@ class AuthService(BaseService):
             raise IncorrectTokenException
 
     async def register_user(self, data: UserRequestAdd) -> None:
+        if not data.password:
+            raise ValidationException
         hashed_password = AuthService().hash_password(data.password)
-        new_user_data = UserAdd(
-            first_name=data.first_name,
-            last_name=data.last_name,
-            username=data.username,
-            email=data.email,
-            hashed_password=hashed_password,
-        )
+        try:
+            new_user_data = UserAdd(
+                first_name=data.first_name,
+                last_name=data.last_name,
+                username=data.username,
+                email=data.email,
+                hashed_password=hashed_password,
+            )
+        except ValidationError as ex:
+            raise ValidationException from ex
         try:
             await self.db.users.add(new_user_data)
             await self.db.session_commit()

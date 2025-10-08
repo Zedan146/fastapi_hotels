@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Request
 
 from src.api.dependencies import UserIdDep, DBDep
 from src.exceptions import UserAlreadyExistsException, \
     UserEmailAlreadyExistsHTTPException, EmailNotRegisteredException, EmailNotRegisteredHTTPException, \
-    IncorrectPasswordException, IncorrectPasswordHTTPException
+    IncorrectPasswordException, IncorrectPasswordHTTPException, ValidationException, \
+    ValidationHTTPException
 from src.services.auth import AuthService
 from src.schemas.users import UserLogin, UserRequestAdd
 
@@ -16,12 +17,14 @@ async def register_user(data: UserRequestAdd, db: DBDep):
         await AuthService(db).register_user(data)
     except UserAlreadyExistsException:
         raise UserEmailAlreadyExistsHTTPException
+    except ValidationException:
+        raise ValidationHTTPException
 
     return {"status": "OK"}
 
 
 @router.post("/login", summary="Авторизация клиента")
-async def login_user(data: UserLogin, response: Response, db: DBDep):
+async def login_user(data: UserLogin, response: Response, request: Request, db: DBDep):
     try:
         access_token = await AuthService(db).login_user(data)
     except EmailNotRegisteredException:
@@ -29,6 +32,9 @@ async def login_user(data: UserLogin, response: Response, db: DBDep):
     except IncorrectPasswordException:
         raise IncorrectPasswordHTTPException
     response.set_cookie("access_token", access_token)
+
+    if request.cookies.get("access_token"):
+        return {"detail": "Вы уже авторизованы!"}
     return {"access_token": access_token}
 
 
@@ -38,6 +44,8 @@ async def get_me(user_id: UserIdDep, db: DBDep):
 
 
 @router.post("/logout", summary="Выход из системы")
-async def logout_user(response: Response):
+async def logout_user(response: Response, request: Request):
+    if not request.cookies.get("access_token"):
+        return {"detail": "Вы не авторизованы"}
     response.delete_cookie("access_token")
-    return {"status": "logout success"}
+    return {"status": "OK"}

@@ -5,7 +5,8 @@ from fastapi import Query, APIRouter, Body, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exceptions import ObjectNotFoundException, HotelNotFoundHTTPException, NoDataHasBeenTransmitted
+from src.exceptions import ObjectNotFoundException, HotelNotFoundHTTPException, NoDataHasBeenTransmitted, \
+    ObjectAlreadyExistsException, ValidationException, ValidationHTTPException
 from src.schemas.hotels import HotelPATCH, HotelAdd
 from src.services.hotels import HotelService
 
@@ -59,7 +60,12 @@ async def create_hotel(
         }
     ),
 ):
-    hotel = await HotelService(db).add_hotel(hotel_data)
+    try:
+        hotel = await HotelService(db).add_hotel(hotel_data)
+    except ObjectAlreadyExistsException:
+        return {"detail": "Такой отель уже существует"}
+    except ValidationException:
+        raise ValidationHTTPException
     return {"status": "OK", "data": hotel}
 
 

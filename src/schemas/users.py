@@ -1,10 +1,10 @@
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 
 
 class UserAdd(BaseModel):
-    first_name: str
-    last_name: str
-    username: str
+    first_name: str = Field(min_length=1)
+    last_name: str = Field(min_length=1)
+    username: str = Field(min_length=1)
     email: EmailStr
     hashed_password: str
 
