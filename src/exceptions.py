@@ -54,6 +54,12 @@ class HotelNotFoundException(ObjectNotFoundException):
     detail = "Отель не найден"
 
 
+class FacilityNotFoundException(ObjectNotFoundException):
+    def __init__(self, detail: str):
+        self.detail = detail
+    detail = "Удобство не найдено"
+
+
 class AllRoomsAreBookedException(NabronirovalException):
     detail = "Не осталось свободных номеров"
 
@@ -104,6 +110,13 @@ class NoAccessTokenHTTPException(NabronirovalHTTPException):
 class ValidationHTTPException(NabronirovalHTTPException):
     status_code = 401
     detail = "Пожалуйста, заполните все поля"
+
+
+class FacilityNotFoundHTTPException(NabronirovalHTTPException):
+    def __init__(self, detail: str):
+        self.detail = detail
+
+    status_code = 404
 
 
 def check_date_to_after_date_from(date_from: date, date_to: date) -> None:

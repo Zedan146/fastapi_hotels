@@ -1,10 +1,8 @@
 from datetime import date
 
-from pydantic import ValidationError
-
 from src.api.dependencies import PaginationDep
 from src.exceptions import check_date_to_after_date_from, ObjectNotFoundException, HotelNotFoundException, \
-    ObjectAlreadyExistsException, ValidationException
+    ObjectAlreadyExistsException
 from src.schemas.hotels import HotelAdd, HotelPATCH, Hotel
 from src.services.base import BaseService
 

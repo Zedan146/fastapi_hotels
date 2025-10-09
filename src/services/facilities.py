@@ -1,4 +1,5 @@
-from src.schemas.facilities import FacilityAdd
+from src.exceptions import FacilityNotFoundException
+from src.schemas.facilities import FacilityAdd, Facility
 from src.services.base import BaseService
 from src.tasks.tasks import test_task
 
@@ -13,3 +14,15 @@ class FacilityService(BaseService):
 
         test_task.delay()   # type: ignore
         return facility
+
+    async def get_missing_facility_with_check(self, facilities_ids: list[int]) -> list[int]:
+        unique_ids = list(set(facilities_ids))
+
+        facilities = await self.db.facilities.get_by_ids(facilities_ids)
+
+        found_ids = {facility.id for facility in facilities}
+        missing_ids = set(unique_ids) - found_ids
+
+        if missing_ids:
+            return list(missing_ids)
+

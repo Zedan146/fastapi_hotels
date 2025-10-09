@@ -1,9 +1,10 @@
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, RoomNotFoundException
+from src.exceptions import ObjectNotFoundException, RoomNotFoundException, FacilityNotFoundException
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch, Room
 from src.services.base import BaseService
+from src.services.facilities import FacilityService
 from src.services.hotels import HotelService
 
 
@@ -26,6 +27,11 @@ class RoomService(BaseService):
 
     async def add_room(self, hotel_id: int, room_data: RoomAddRequest):
         await HotelService(self.db).get_hotel_with_check(hotel_id)
+        missing_ids = await FacilityService(self.db).get_missing_facility_with_check(
+            facilities_ids=room_data.facilities_ids
+        )
+        if missing_ids:
+            raise FacilityNotFoundException(f"Удобства с ID {missing_ids} не найдены")
 
         _room_data = RoomAdd(hotel_id=hotel_id, **room_data.model_dump())
         room = await self.db.rooms.add(_room_data)
