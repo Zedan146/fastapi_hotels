@@ -1,3 +1,4 @@
+from src.exceptions import ObjectAlreadyExistsException
 from src.schemas.facilities import FacilityAdd
 from src.services.base import BaseService
 from src.tasks.tasks import test_task
@@ -8,10 +9,13 @@ class FacilityService(BaseService):
         return await self.db.facilities.get_all()
 
     async def create_facility(self, data: FacilityAdd):
+        facilities = await self.get_facilities()
+        if data.title in [entity.title for entity in facilities]:
+            raise ObjectAlreadyExistsException
         facility = await self.db.facilities.add(data)
         await self.db.session_commit()
 
-        test_task.delay()   # type: ignore
+        # test_task.delay()   # type: ignore
         return facility
 
     async def get_missing_facility_with_check(self, facilities_ids: list[int]) -> list[int]:

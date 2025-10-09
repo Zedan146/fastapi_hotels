@@ -107,6 +107,11 @@ class NoAccessTokenHTTPException(NabronirovalHTTPException):
     detail = "Вы не предоставили токен доступа"
 
 
+class ObjectAlreadyExistsHTTPException(NabronirovalHTTPException):
+    status_code = 409
+    detail = "Похожий объект уже существует"
+
+
 class ValidationHTTPException(NabronirovalHTTPException):
     def __init__(self, detail: str):
         self.detail = detail

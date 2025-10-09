@@ -1,7 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 
+from src.schemas.mixin import NonEmptyStringMixin
 
-class FacilityAdd(BaseModel):
+
+class FacilityAdd(NonEmptyStringMixin):
     title: str
 
 
