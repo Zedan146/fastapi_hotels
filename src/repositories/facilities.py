@@ -31,8 +31,15 @@ class RoomFacilitiesRepository(BaseRepository):
         )
         current_facilities_ids = get_current_facilities_ids_query.scalars().all()
 
-        ids_to_delete = list(set(current_facilities_ids) - set(facilities_ids))
-        ids_to_insert = list(set(facilities_ids) - set(current_facilities_ids))
+        ids_to_delete = (
+            list(set(current_facilities_ids) - set(facilities_ids)) if facilities_ids is not None
+            else current_facilities_ids
+        )
+
+        ids_to_insert = (
+            list(set(facilities_ids) - set(current_facilities_ids)) if facilities_ids is not None
+            else []
+        )
 
         if ids_to_delete:
             delete_facilities_stmt = delete(self.model).filter(

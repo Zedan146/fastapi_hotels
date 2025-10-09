@@ -30,12 +30,12 @@ class RoomWithRels(Room):
     facilities: list[Facility]
 
 
-class RoomPatchRequest(BaseModel):
+class RoomPatchRequest(NonEmptyStringMixin):
     title: str | None = None
     description: str | None = None
     price: int | None = None
     quantity: int | None = None
-    facilities_ids: list[int] = []
+    facilities_ids: list[int] | None = None
 
 
 class RoomPatch(BaseModel):

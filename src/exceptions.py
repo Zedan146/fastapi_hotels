@@ -108,8 +108,10 @@ class NoAccessTokenHTTPException(NabronirovalHTTPException):
 
 
 class ValidationHTTPException(NabronirovalHTTPException):
+    def __init__(self, detail: str):
+        self.detail = detail
+
     status_code = 401
-    detail = "Пожалуйста, заполните все поля"
 
 
 class FacilityNotFoundHTTPException(NabronirovalHTTPException):
