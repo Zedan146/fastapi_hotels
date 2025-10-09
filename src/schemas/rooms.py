@@ -1,9 +1,10 @@
 from pydantic import BaseModel, ConfigDict
 
 from src.schemas.facilities import Facility
+from src.schemas.mixin import NonEmptyStringMixin
 
 
-class RoomAddRequest(BaseModel):
+class RoomAddRequest(NonEmptyStringMixin):
     title: str
     description: str | None = None
     price: int
