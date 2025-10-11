@@ -63,7 +63,7 @@ class RoomService(BaseService):
         _room_data_dict = room_data.model_dump(exclude_unset=True)
         if not _room_data_dict:
             raise ValidationException
-        _room_data = RoomPatch(hotel_id=hotel_id)
+        _room_data = RoomPatch(hotel_id=hotel_id, **_room_data_dict)
 
         await self.db.rooms.edit(_room_data, exclude_unset=True, id=room_id, hotel_id=hotel_id)
 
@@ -72,7 +72,7 @@ class RoomService(BaseService):
                 room_id, facilities_ids=_room_data_dict["facilities_ids"]
             )
         await self.db.session_commit()
-        return await self.db.rooms.get_one(id=room_id)
+        return await self.db.rooms.get_one(hotel_id=hotel_id, id=room_id)
 
     async def delete_room(self, hotel_id: int, room_id: int):
         await HotelService(self.db).get_hotel_with_check(hotel_id)

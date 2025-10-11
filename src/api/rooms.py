@@ -80,7 +80,7 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
     except FacilityNotFoundException as ex:
         raise FacilityNotFoundHTTPException(detail=f"{ex}")
     except ValidationException as ex:
-        raise ValidationHTTPException(detail="Пожалуйста, заполните хотя бы одно поле для изменения")
+        raise ValidationHTTPException(detail="Пожалуйста, заполните хотя бы одно поле для изменения") from ex
 
     return {"status": "OK", "new_data": room}
 
