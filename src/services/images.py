@@ -14,7 +14,7 @@ class ImagesService(BaseService):
         file_extension = file.filename.split('.')[-1].lower()
         if file_extension not in self.ALLOWED_IMAGE_TYPES:
             raise UnavailableFileFormatException(
-                detail=f"Недопустимый формат файла. Разрешены: {', '.join(self.ALLOWED_IMAGE_TYPES)}"
+                detail=f".{file_extension} недопустимый формат файла. Разрешены: {', '.join(self.ALLOWED_IMAGE_TYPES)}"
             )
 
         image_path = f"src/static/images/{file.filename}"

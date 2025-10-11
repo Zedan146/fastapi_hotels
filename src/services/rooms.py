@@ -92,4 +92,4 @@ class RoomService(BaseService):
             facilities_ids=data.facilities_ids
         )
         if missing_ids:
-            raise FacilityNotFoundException(f"Удобства с ID {missing_ids} не найдены")
+            raise FacilityNotFoundException(detail=f"Удобства с ID {missing_ids} не найдены")

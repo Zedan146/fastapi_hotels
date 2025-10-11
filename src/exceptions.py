@@ -61,9 +61,10 @@ class HotelNotFoundException(ObjectNotFoundException):
 
 
 class FacilityNotFoundException(ObjectNotFoundException):
-    def __init__(self, detail: str):
-        self.detail = detail
-    detail = "Удобство не найдено"
+    def __init__(self, detail: str | None = None):
+        if detail is None:
+            detail = "Удобство не найдено"
+        super().__init__(detail)
 
 
 class AllRoomsAreBookedException(NabronirovalException):
