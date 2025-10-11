@@ -15,7 +15,7 @@ class FacilityService(BaseService):
         facility = await self.db.facilities.add(data)
         await self.db.session_commit()
 
-        test_task.delay()   # type: ignore
+        # test_task.delay()   # type: ignore
         return facility
 
     async def get_missing_facility_with_check(self, facilities_ids: list[int]) -> list[int]:
