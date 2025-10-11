@@ -9,8 +9,8 @@ from src.exceptions import (
     RoomNotFoundException,
     check_date_to_after_date_from,
     HotelNotFoundHTTPException,
-    RoomNotFoundHTTPException, HotelNotFoundException, FacilityNotFoundException, FacilityNotFoundHTTPException,
-    ValidationException, ValidationHTTPException
+    RoomNotFoundHTTPException, HotelNotFoundException, FacilityNotFoundHTTPException,
+    ValidationException, FacilityNotFoundCustomException, ValidationCustomHTTPException
 )
 from src.schemas.rooms import RoomAddRequest, RoomPatchRequest
 from src.services.rooms import RoomService
@@ -50,7 +50,7 @@ async def create_room(hotel_id: int, db: DBDep, room_data: RoomAddRequest = Body
         room = await RoomService(db).add_room(hotel_id, room_data)
     except HotelNotFoundException:
         raise HotelNotFoundHTTPException
-    except FacilityNotFoundException as ex:
+    except FacilityNotFoundCustomException as ex:
         raise FacilityNotFoundHTTPException(detail=f"{ex}")
     return {"status": "OK", "data": room}
 
@@ -63,7 +63,7 @@ async def put_room(room_data: RoomAddRequest, hotel_id: int, room_id: int, db: D
         raise RoomNotFoundHTTPException
     except HotelNotFoundException:
         raise HotelNotFoundHTTPException
-    except FacilityNotFoundException as ex:
+    except FacilityNotFoundCustomException as ex:
         raise FacilityNotFoundHTTPException(detail=f"{ex}")
 
     return {"status": "OK", "new_data": room}
@@ -77,10 +77,10 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
         raise RoomNotFoundHTTPException
     except HotelNotFoundException:
         raise HotelNotFoundHTTPException
-    except FacilityNotFoundException as ex:
+    except FacilityNotFoundCustomException as ex:
         raise FacilityNotFoundHTTPException(detail=f"{ex}")
     except ValidationException as ex:
-        raise ValidationHTTPException(detail="Пожалуйста, заполните хотя бы одно поле для изменения") from ex
+        raise ValidationCustomHTTPException(detail="Пожалуйста, заполните хотя бы одно поле для изменения") from ex
 
     return {"status": "OK", "new_data": room}
 

@@ -1,7 +1,7 @@
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, RoomNotFoundException, FacilityNotFoundException, \
-    ValidationException
+from src.exceptions import ObjectNotFoundException, RoomNotFoundException, \
+    ValidationException, FacilityNotFoundCustomException
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch, Room
 from src.services.base import BaseService
@@ -92,4 +92,4 @@ class RoomService(BaseService):
             facilities_ids=data.facilities_ids
         )
         if missing_ids:
-            raise FacilityNotFoundException(detail=f"Удобства с ID {missing_ids} не найдены")
+            raise FacilityNotFoundCustomException(f"Удобства с ID {missing_ids} не найдены")

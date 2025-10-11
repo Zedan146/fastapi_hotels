@@ -4,9 +4,10 @@ from fastapi import HTTPException
 
 
 class NabronirovalException(Exception):
-    def __init__(self, detail: str = "Неожиданная ошибка"):
-        self.detail = detail
-        super().__init__(self.detail)
+    detail = "Неожиданная ошибка"
+
+    def __init__(self, *args):
+        super().__init__(self.detail, *args)
 
 
 class NabronirovalHTTPException(HTTPException):
@@ -27,13 +28,6 @@ class EmailNotRegisteredException(NabronirovalException):
 
 class IncorrectPasswordException(NabronirovalException):
     detail = "Пароль неверный"
-
-
-class UnavailableFileFormatException(NabronirovalException):
-    def __init__(self, detail: str | None = None):
-        if detail is None:
-            detail = "Недопустимый формат файла"
-        super().__init__(detail)
 
 
 class UserAlreadyExistsException(NabronirovalException):
@@ -58,13 +52,6 @@ class RoomNotFoundException(ObjectNotFoundException):
 
 class HotelNotFoundException(ObjectNotFoundException):
     detail = "Отель не найден"
-
-
-class FacilityNotFoundException(ObjectNotFoundException):
-    def __init__(self, detail: str | None = None):
-        if detail is None:
-            detail = "Удобство не найдено"
-        super().__init__(detail)
 
 
 class AllRoomsAreBookedException(NabronirovalException):
@@ -119,18 +106,35 @@ class ObjectAlreadyExistsHTTPException(NabronirovalHTTPException):
     detail = "Похожий объект уже существует"
 
 
-class UnavailableFileFormatHTTPException(NabronirovalHTTPException):
-    def __init__(self, detail: str):
-        self.detail = detail
-
-    status_code = 400
-
-
 class ValidationHTTPException(NabronirovalHTTPException):
-    def __init__(self, detail: str):
-        self.detail = detail
-
+    detail = "Пожалуйста, заполните все поля"
     status_code = 401
+
+
+def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
+    if date_from >= date_to:
+        raise HTTPException(status_code=422, detail="Дата заезда должна быть меньше даты выезда!")
+
+
+class NabronirovalCustomException(Exception):
+    def __init__(self, detail: str = "Неизвестная ошибка"):
+        self.detail = detail
+        super().__init__(self.detail)
+
+
+class ValidationCustomException(NabronirovalCustomException):
+    def __init__(self, detail: str | None = None):
+        if detail is None:
+            detail = "Ошибка валидации"
+        super().__init__(detail)
+
+
+class FacilityNotFoundCustomException(ValidationCustomException):
+    detail = "Удобство не найдено"
+
+
+class UnavailableFileFormatException(ValidationCustomException):
+    detail = "Недопустимый формат файла"
 
 
 class FacilityNotFoundHTTPException(NabronirovalHTTPException):
@@ -140,6 +144,15 @@ class FacilityNotFoundHTTPException(NabronirovalHTTPException):
     status_code = 404
 
 
-def check_date_to_after_date_from(date_from: date, date_to: date) -> None:
-    if date_from >= date_to:
-        raise HTTPException(status_code=422, detail="Дата заезда должна быть меньше даты выезда!")
+class UnavailableFileFormatHTTPException(NabronirovalHTTPException):
+    def __init__(self, detail: str):
+        self.detail = detail
+
+    status_code = 400
+
+
+class ValidationCustomHTTPException(NabronirovalHTTPException):
+    def __init__(self, detail: str):
+        self.detail = detail
+
+    status_code = 401
