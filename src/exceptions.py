@@ -4,10 +4,9 @@ from fastapi import HTTPException
 
 
 class NabronirovalException(Exception):
-    detail = "Неожиданная ошибка"
-
-    def __init__(self, *args):
-        super().__init__(self.detail, *args)
+    def __init__(self, detail: str = "Неожиданная ошибка"):
+        self.detail = detail
+        super().__init__(self.detail)
 
 
 class NabronirovalHTTPException(HTTPException):
@@ -28,6 +27,13 @@ class EmailNotRegisteredException(NabronirovalException):
 
 class IncorrectPasswordException(NabronirovalException):
     detail = "Пароль неверный"
+
+
+class UnavailableFileFormatException(NabronirovalException):
+    def __init__(self, detail: str | None = None):
+        if detail is None:
+            detail = "Недопустимый формат файла"
+        super().__init__(detail)
 
 
 class UserAlreadyExistsException(NabronirovalException):
@@ -110,6 +116,13 @@ class NoAccessTokenHTTPException(NabronirovalHTTPException):
 class ObjectAlreadyExistsHTTPException(NabronirovalHTTPException):
     status_code = 409
     detail = "Похожий объект уже существует"
+
+
+class UnavailableFileFormatHTTPException(NabronirovalHTTPException):
+    def __init__(self, detail: str):
+        self.detail = detail
+
+    status_code = 400
 
 
 class ValidationHTTPException(NabronirovalHTTPException):
