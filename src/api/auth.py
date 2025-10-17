@@ -38,7 +38,7 @@ async def login_user(data: UserLogin, response: Response, request: Request, db: 
     return {"access_token": access_token}
 
 
-@router.get("/me", summary="Получение текущего пользователя")
+@router.get("/me", summary="Мой профиль 🤵‍")
 async def get_me(user_id: UserIdDep, db: DBDep):
     return await AuthService(db).get_one_or_none_user(user_id)
 
