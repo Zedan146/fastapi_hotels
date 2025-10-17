@@ -15,7 +15,7 @@ async def test_get_facilities(ac):
         ("", 422),
         ("Балкон", 200),
         ("Балкон", 409),
-    ]
+    ],
 )
 async def test_create_facility(ac, facility_title: str, status_code: int):
     response = await ac.post("/facilities", json={"title": facility_title})
