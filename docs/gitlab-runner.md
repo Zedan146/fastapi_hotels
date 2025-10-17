@@ -17,7 +17,7 @@ docker run --rm -it \
 
 ### Изменение конфига
 #### Шаг 1
-Заходим в режим редактирования конфига через        
+Заходим в режим редактирования конфига через
 `nano /srv/gitlab-runner/config/config.toml`        
 или     
 `vim /srv/gitlab-runner/config/config.toml`

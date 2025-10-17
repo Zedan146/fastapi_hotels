@@ -64,8 +64,8 @@ docker compose build
 ### База данных
 ```
 docker run --name booking_db \
-    -p 6432:5432 \                                          
-    -e POSTGRES_USER=abcde \    
+    -p 6432:5432 \
+    -e POSTGRES_USER=abcde \
     -e POSTGRES_PASSWORD=abdasd8as78d678asdasdjlcde \
     -e POSTGRES_DB=booking \
     --network=myNetwork \
