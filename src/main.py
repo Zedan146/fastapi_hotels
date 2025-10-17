@@ -51,8 +51,8 @@ app.include_router(router_images)
 @app.get("/", tags=["Шаблоны"], summary="Домашняя страница", response_class=HTMLResponse)
 def home():
     return """
-    <a href="https://vhotelok/docs">Docs</a><br>
-    <a href="https://vhotelok/redoc">ReDoc</a>
+    <a href="https://vhotelok.ru/docs">Docs</a><br>
+    <a href="https://vhotelok.ru/redoc">ReDoc</a>
     """
 
 
