@@ -1,7 +1,6 @@
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
 
 
 revision: str = "41f6c2ee488d"

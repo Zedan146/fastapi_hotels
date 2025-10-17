@@ -1,7 +1,6 @@
 from src.exceptions import ObjectAlreadyExistsException
 from src.schemas.facilities import FacilityAdd
 from src.services.base import BaseService
-from src.tasks.tasks import test_task
 
 
 class FacilityService(BaseService):
