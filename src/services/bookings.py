@@ -14,7 +14,9 @@ class BookingService(BaseService):
     async def create_booking(self, user_id: UserIdDep, booking_data: BookingAddRequest):
         room_data = await RoomService(self.db).get_room_with_check(booking_data.room_id)
         hotel_id = room_data.hotel_id
-        _booking_data = BookingAdd(user_id=user_id, price=room_data.price, **booking_data.model_dump())
+        _booking_data = BookingAdd(
+            user_id=user_id, price=room_data.price, **booking_data.model_dump()
+        )
         booking = await self.db.bookings.add_booking(
             _booking_data,
             hotel_id,

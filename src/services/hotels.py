@@ -1,20 +1,24 @@
 from datetime import date
 
 from src.api.dependencies import PaginationDep
-from src.exceptions import check_date_to_after_date_from, ObjectNotFoundException, HotelNotFoundException, \
-    ObjectAlreadyExistsException
+from src.exceptions import (
+    check_date_to_after_date_from,
+    ObjectNotFoundException,
+    HotelNotFoundException,
+    ObjectAlreadyExistsException,
+)
 from src.schemas.hotels import HotelAdd, HotelPATCH, Hotel
 from src.services.base import BaseService
 
 
 class HotelService(BaseService):
     async def get_hotels_by_time(
-            self,
-            pagination: PaginationDep,
-            title: str | None,
-            location: str | None,
-            date_from: date,
-            date_to: date,
+        self,
+        pagination: PaginationDep,
+        title: str | None,
+        location: str | None,
+        date_from: date,
+        date_to: date,
     ):
         per_page = pagination.per_page or 5
         check_date_to_after_date_from(date_from, date_to)
@@ -43,7 +47,9 @@ class HotelService(BaseService):
         await self.db.hotels.edit(hotel_data, id=hotel_id)
         await self.db.session_commit()
 
-    async def edit_hotel_partially(self, hotel_id: int, hotel_data: HotelPATCH, exclude_unset: bool = False):
+    async def edit_hotel_partially(
+        self, hotel_id: int, hotel_data: HotelPATCH, exclude_unset: bool = False
+    ):
         await self.db.hotels.get_one(id=hotel_id)
 
         await self.db.hotels.edit(hotel_data, exclude_unset=exclude_unset, id=hotel_id)

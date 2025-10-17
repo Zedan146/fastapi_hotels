@@ -1,7 +1,11 @@
 from datetime import date
 
-from src.exceptions import ObjectNotFoundException, RoomNotFoundException, \
-    ValidationException, FacilityNotFoundCustomException
+from src.exceptions import (
+    ObjectNotFoundException,
+    RoomNotFoundException,
+    ValidationException,
+    FacilityNotFoundCustomException,
+)
 from src.schemas.facilities import RoomFacilityAdd
 from src.schemas.rooms import RoomAdd, RoomAddRequest, RoomPatchRequest, RoomPatch, Room
 from src.services.base import BaseService
@@ -15,10 +19,10 @@ class RoomService(BaseService):
         return await self.db.rooms.get_one(hotel_id=hotel_id, id=room_id)
 
     async def get_filtered_by_time(
-            self,
-            hotel_id: int,
-            date_from: date,
-            date_to: date,
+        self,
+        hotel_id: int,
+        date_from: date,
+        date_to: date,
     ):
         await self.db.hotels.get_one(id=hotel_id)
 

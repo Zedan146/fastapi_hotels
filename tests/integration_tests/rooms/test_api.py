@@ -2,18 +2,21 @@ import pytest
 from httpx import AsyncClient
 
 
-@pytest.mark.parametrize("hotel_id, date_from, date_to, status_code", [
-    (1, "2024-08-01", "2024-08-10", 200),
-    (1, "2024-08-20", "2024-08-10", 422),
-    (2, "2024-08-01", "2025-09-10", 200),
-])
+@pytest.mark.parametrize(
+    "hotel_id, date_from, date_to, status_code",
+    [
+        (1, "2024-08-01", "2024-08-10", 200),
+        (1, "2024-08-20", "2024-08-10", 422),
+        (2, "2024-08-01", "2025-09-10", 200),
+    ],
+)
 async def test_get_rooms(
-        ac: AsyncClient,
-        hotel_id: int,
-        date_from: str,
-        date_to: str,
-        status_code: int,
-        add_data_in_database
+    ac: AsyncClient,
+    hotel_id: int,
+    date_from: str,
+    date_to: str,
+    status_code: int,
+    add_data_in_database,
 ):
     response = await ac.get(
         f"/hotels/{hotel_id}/rooms",
@@ -26,25 +29,23 @@ async def test_get_rooms(
     assert response.status_code == status_code
 
 
-@pytest.mark.parametrize("hotel_id, room_id, status_code, detail", [
-    (1, 1, 200, None),
-    (1, 2, 200, None),
-    ("str", "str", 422, None),
-    (1, "str", 422, None),
-    ("str", 2, 422, None),
-    (2, 5, 404, "Номер не найден"),
-    (4, 2, 404, "Отель не найден"),
-])
+@pytest.mark.parametrize(
+    "hotel_id, room_id, status_code, detail",
+    [
+        (1, 1, 200, None),
+        (1, 2, 200, None),
+        ("str", "str", 422, None),
+        (1, "str", 422, None),
+        ("str", 2, 422, None),
+        (2, 5, 404, "Номер не найден"),
+        (4, 2, 404, "Отель не найден"),
+    ],
+)
 async def test_get_room(
-        ac: AsyncClient,
-        hotel_id: int,
-        room_id: int,
-        status_code: int,
-        detail: str
+    ac: AsyncClient, hotel_id: int, room_id: int, status_code: int, detail: str
 ):
     response = await ac.get(
-        f"/hotels/{hotel_id}/rooms/{room_id}",
-        params={"hotel_id": hotel_id, "room_id": room_id}
+        f"/hotels/{hotel_id}/rooms/{room_id}", params={"hotel_id": hotel_id, "room_id": room_id}
     )
 
     assert response.status_code == status_code
@@ -56,38 +57,41 @@ async def test_get_room(
         assert room.get("detail") == detail
 
 
-@pytest.mark.parametrize("hotel_id, title, description, price, quantity, facilities_ids, status_code", [
-    (1, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [1, 2], 200),
-    (5, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [], 404),
-    (1, 546, "Лучший номер отеля.", 250, 4, [], 422),
-    (1, "Делюкс Плюс", 234, 250, 4, [], 422),
-    (1, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [], 200),
-])
+@pytest.mark.parametrize(
+    "hotel_id, title, description, price, quantity, facilities_ids, status_code",
+    [
+        (1, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [1, 2], 200),
+        (5, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [], 404),
+        (1, 546, "Лучший номер отеля.", 250, 4, [], 422),
+        (1, "Делюкс Плюс", 234, 250, 4, [], 422),
+        (1, "Делюкс Плюс", "Лучший номер отеля.", 250, 4, [], 200),
+    ],
+)
 async def test_create_room(
-        ac: AsyncClient,
-        hotel_id: int,
-        title: str,
-        description: str,
-        price: int,
-        quantity: int,
-        facilities_ids: list[int],
-        status_code: int
+    ac: AsyncClient,
+    hotel_id: int,
+    title: str,
+    description: str,
+    price: int,
+    quantity: int,
+    facilities_ids: list[int],
+    status_code: int,
 ):
     response = await ac.post(
         f"/hotels/{hotel_id}/rooms",
         json={
-          "title": title,
-          "description": description,
-          "price": price,
-          "quantity": quantity,
-          "facilities_ids": facilities_ids
-        }
+            "title": title,
+            "description": description,
+            "price": price,
+            "quantity": quantity,
+            "facilities_ids": facilities_ids,
+        },
     )
 
     assert response.status_code == status_code
     hotel = response.json()
     if status_code == 200:
-        assert hotel['status'] == "OK"
+        assert hotel["status"] == "OK"
         assert hotel["data"]["title"] == title
         assert hotel["data"]["description"] == description
         for facility in hotel["data"]["facilities"]:

@@ -1,10 +1,16 @@
 from fastapi import APIRouter, Response, Request
 
 from src.api.dependencies import UserIdDep, DBDep
-from src.exceptions import UserAlreadyExistsException, \
-    UserEmailAlreadyExistsHTTPException, EmailNotRegisteredException, EmailNotRegisteredHTTPException, \
-    IncorrectPasswordException, IncorrectPasswordHTTPException, ValidationException, \
-    ValidationHTTPException
+from src.exceptions import (
+    UserAlreadyExistsException,
+    UserEmailAlreadyExistsHTTPException,
+    EmailNotRegisteredException,
+    EmailNotRegisteredHTTPException,
+    IncorrectPasswordException,
+    IncorrectPasswordHTTPException,
+    ValidationException,
+    ValidationHTTPException,
+)
 from src.services.auth import AuthService
 from src.schemas.users import UserLogin, UserRequestAdd
 

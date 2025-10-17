@@ -5,8 +5,14 @@ from fastapi import Query, APIRouter, Body, HTTPException
 from fastapi_cache.decorator import cache
 
 from src.api.dependencies import PaginationDep, DBDep
-from src.exceptions import ObjectNotFoundException, HotelNotFoundHTTPException, NoDataHasBeenTransmitted, \
-    ObjectAlreadyExistsException, ValidationException, ValidationHTTPException
+from src.exceptions import (
+    ObjectNotFoundException,
+    HotelNotFoundHTTPException,
+    NoDataHasBeenTransmitted,
+    ObjectAlreadyExistsException,
+    ValidationException,
+    ValidationHTTPException,
+)
 from src.schemas.hotels import HotelPATCH, HotelAdd
 from src.services.hotels import HotelService
 

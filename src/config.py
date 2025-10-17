@@ -18,9 +18,7 @@ class Settings(BaseSettings):
 
     @property
     def REDIS_URL(self):
-        return (
-            f"redis://{self.REDIS_USER}@{self.REDIS_HOST}:{self.REDIS_PORT}"
-        )
+        return f"redis://{self.REDIS_USER}@{self.REDIS_HOST}:{self.REDIS_PORT}"
 
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str

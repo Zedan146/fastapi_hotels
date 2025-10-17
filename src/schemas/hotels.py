@@ -17,4 +17,3 @@ class Hotel(HotelAdd):
 class HotelPATCH(NonEmptyStringMixin):
     title: str | None = Field(None)
     location: str | None = Field(None)
-

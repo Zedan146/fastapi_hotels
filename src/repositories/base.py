@@ -7,7 +7,11 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import NoResultFound, IntegrityError, ProgrammingError
 from pydantic import BaseModel
 
-from src.exceptions import ObjectNotFoundException, ObjectAlreadyExistsException, NoDataHasBeenTransmitted
+from src.exceptions import (
+    ObjectNotFoundException,
+    ObjectAlreadyExistsException,
+    NoDataHasBeenTransmitted,
+)
 from src.repositories.mappers.base import DataMapper
 
 

@@ -9,8 +9,12 @@ from src.exceptions import (
     RoomNotFoundException,
     check_date_to_after_date_from,
     HotelNotFoundHTTPException,
-    RoomNotFoundHTTPException, HotelNotFoundException, FacilityNotFoundHTTPException,
-    ValidationException, FacilityNotFoundCustomException, ValidationCustomHTTPException
+    RoomNotFoundHTTPException,
+    HotelNotFoundException,
+    FacilityNotFoundHTTPException,
+    ValidationException,
+    FacilityNotFoundCustomException,
+    ValidationCustomHTTPException,
 )
 from src.schemas.rooms import RoomAddRequest, RoomPatchRequest
 from src.services.rooms import RoomService
@@ -80,7 +84,9 @@ async def patch_room(hotel_id: int, room_id: int, db: DBDep, room_data: RoomPatc
     except FacilityNotFoundCustomException as ex:
         raise FacilityNotFoundHTTPException(detail=f"{ex}")
     except ValidationException as ex:
-        raise ValidationCustomHTTPException(detail="Пожалуйста, заполните хотя бы одно поле для изменения") from ex
+        raise ValidationCustomHTTPException(
+            detail="Пожалуйста, заполните хотя бы одно поле для изменения"
+        ) from ex
 
     return {"status": "OK", "new_data": room}
 

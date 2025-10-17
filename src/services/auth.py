@@ -5,8 +5,14 @@ import jwt
 from pydantic import ValidationError
 
 from src.config import settings
-from src.exceptions import IncorrectTokenException, ObjectAlreadyExistsException, UserAlreadyExistsException, \
-    EmailNotRegisteredException, IncorrectPasswordException, ValidationException
+from src.exceptions import (
+    IncorrectTokenException,
+    ObjectAlreadyExistsException,
+    UserAlreadyExistsException,
+    EmailNotRegisteredException,
+    IncorrectPasswordException,
+    ValidationException,
+)
 from src.schemas.users import UserRequestAdd, UserAdd, UserLogin
 from src.services.base import BaseService
 
